@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.notificationstore" />
+                  <option name="mobileSdkAppId" value="1:729531041060:android:3dca8f93e7a705ba851fb1" />
+                  <option name="projectId" value="notificationstore-ratnakatuwal" />
+                  <option name="projectNumber" value="729531041060" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
