@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "729531041060",
+    "project_id": "notificationstore-ratnakatuwal",
+    "storage_bucket": "notificationstore-ratnakatuwal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:729531041060:android:3dca8f93e7a705ba851fb1",
+        "android_client_info": {
+          "package_name": "com.example.notificationstore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX0DSa-AjSWa25ZtgVJRn4cVa4lu-9F9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
