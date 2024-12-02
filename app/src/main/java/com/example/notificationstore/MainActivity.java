@@ -2,16 +2,12 @@ package com.example.notificationstore;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,56 +24,60 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private NotificationAdapter notificationAdapter;
     private List<NotificationModel> notificationModels;
     private FirebaseAuth mAuth;
-    ImageView imageView2;
+    private ImageView logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        imageView2 = findViewById(R.id.imageView2);
-
+        logoutButton = findViewById(R.id.imageView2);
         RecyclerView recyclerView = findViewById(R.id.notificationRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         notificationModels = new ArrayList<>();
-//        notificationModels.add(new NotificationModel("Facebook", "harry sent you a request",  2024-12-1 9:40 , R.drawable.facebook));
-//        notificationModels.add(new NotificationModel("Instagram", "harry sent you a request", "Date/Time: 2024-12-1 9:40 PM", R.drawable.facebook));
-//        notificationModels.add(new NotificationModel("Twitter", "harry sent you a request", "Date/Time: 2024-12-1 9:40 PM", R.drawable.facebook));
-//        notificationModels.add(new NotificationModel("Whatsapp", "harry sent you a request", "Date/Time: 2024-12-1 9:40 PM", R.drawable.facebook));
-//        notificationModels.add(new NotificationModel("Facebook", "harry sent you a request", "Date/Time: 2024-12-1 9:40 PM", R.drawable.facebook));
-
-        mAuth = FirebaseAuth.getInstance();
         notificationAdapter = new NotificationAdapter(this, notificationModels);
         recyclerView.setAdapter(notificationAdapter);
 
-        imageView2.setOnClickListener(v -> {
+        mAuth = FirebaseAuth.getInstance();
+
+        logoutButton.setOnClickListener(v -> {
             mAuth.signOut();
-            Toast.makeText(this, "Logout Successfully", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         });
 
+        loadNotificationsFromFirebase();
+    }
+
+    private void loadNotificationsFromFirebase() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("notifications");
+
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d(TAG, "Snapshot children count: " + snapshot.getChildrenCount());
                 notificationModels.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    NotificationModel notificationModel = snapshot.getValue(NotificationModel.class);
-                    notificationModels.add(notificationModel);
+                    Log.d(TAG, "Snapshot key: " + dataSnapshot.getKey());
+                    NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
+                    if (notificationModel != null) {
+                        Log.d(TAG, "Loaded notification: " + notificationModel.getAppName());
+                        notificationModels.add(notificationModel);
+                    }
                 }
                 notificationAdapter.notifyDataSetChanged();
+                Log.d(TAG, "Notifications loaded: " + notificationModels.size());
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e(TAG, "Failed to load notifications: " + error.getMessage());
             }
         });
     }
