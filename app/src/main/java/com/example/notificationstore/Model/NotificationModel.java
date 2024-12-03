@@ -4,13 +4,17 @@ public class NotificationModel {
     private String appName;
     private String notificationContent;
     private long notificationDateTime;
-    private Integer appIcon;
+    private String appIconBase64;
 
-    public NotificationModel(String appName, String notificationContent, long notificationDateTime, Integer appIcon) {
+    public NotificationModel(){
+
+    }
+
+    public NotificationModel(String appName, String notificationContent, long notificationDateTime, String appIconBase64) {
         this.appName = appName;
         this.notificationContent = notificationContent;
         this.notificationDateTime = notificationDateTime;
-        this.appIcon = appIcon;
+        this.appIconBase64 = appIconBase64;
     }
 
     public String getAppName() {
@@ -37,11 +41,11 @@ public class NotificationModel {
         this.notificationDateTime = notificationDateTime;
     }
 
-    public Integer getAppIcon() {
-        return appIcon;
+    public String getAppIconBase64() {
+        return appIconBase64;
     }
 
-    public void setAppIcon(Integer appIcon) {
-        this.appIcon = appIcon;
+    public void setAppIconBase64(String appIconBase64) {
+        this.appIconBase64 = appIconBase64;
     }
 }

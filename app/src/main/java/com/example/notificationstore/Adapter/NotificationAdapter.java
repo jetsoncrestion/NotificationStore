@@ -1,6 +1,10 @@
 package com.example.notificationstore.Adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,10 +51,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.notificationDateTime.setText(formattedDate);
 
         // Set the app icon
-        if (notificationModel.getAppIcon() != null) {
-            holder.appIcon.setImageResource(notificationModel.getAppIcon());
+        String appIconBase64 = notificationModel.getAppIconBase64();
+        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
+            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
+            if (bitmap != null) {
+                holder.appIcon.setImageBitmap(bitmap);
+            } else {
+                Log.e("NotificationAdapter", "Failed to decode app icon Base64. Using fallback icon.");
+                holder.appIcon.setImageResource(R.drawable.baseline_android_24);
+            }
         } else {
-            holder.appIcon.setImageResource(R.drawable.user); // Fallback icon
+            Log.e("NotificationAdapter", "App icon Base64 is null or empty. Using fallback icon.");
+            holder.appIcon.setImageResource(R.drawable.baseline_android_24);
         }
     }
 
@@ -69,6 +81,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             notificationContent = itemView.findViewById(R.id.notificationContent);
             notificationDateTime = itemView.findViewById(R.id.notificationDateTime);
             appIcon = itemView.findViewById(R.id.appIcon);
+        }
+    }
+    private Bitmap decodeBase64ToBitmap(String base64String) {
+        try {
+            byte[] decodedBytes = Base64.decode(base64String, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

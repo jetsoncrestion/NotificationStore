@@ -79,7 +79,7 @@
         android:layout_marginTop="@dimen/_15sdp"
         android:background="@drawable/custom_edit_text"
         android:paddingEnd="@dimen/_5sdp"
-        android:drawableEnd="@drawable/eye"
+        android:drawableEnd="@drawable/eye_show_svgrepo_com"
         android:fontFamily="@font/zenantique"
         android:autofillHints="password"
         android:textSize="@dimen/_20ssp"

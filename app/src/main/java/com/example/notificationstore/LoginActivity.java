@@ -1,8 +1,11 @@
 package com.example.notificationstore;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -26,7 +29,9 @@ public class LoginActivity extends AppCompatActivity {
     private String Name, Email, Password, ConfirmPassword;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
+    boolean isPasswordVisible = false;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +61,27 @@ public class LoginActivity extends AppCompatActivity {
         signupText.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
+        });
+
+        editTextPassword.setOnTouchListener((view, motionEvent) -> {
+            int DRAWABLE_END = 2;
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if (motionEvent.getRawX() >= (editTextPassword.getRight() - editTextPassword.getCompoundDrawables()[DRAWABLE_END].getBounds().width())) {
+                    if (isPasswordVisible) {
+                        editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        editTextPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock, 0, R.drawable.eye_show_svgrepo_com, 0);
+                    } else {
+                        editTextPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        editTextPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock, 0, R.drawable.eyeoff, 0);
+                    }
+                    isPasswordVisible = !isPasswordVisible;
+                    editTextPassword.setSelection(editTextPassword.getText().length());
+
+                    view.performClick();
+                    return true;
+                }
+            }
+            return false;
         });
     }
 

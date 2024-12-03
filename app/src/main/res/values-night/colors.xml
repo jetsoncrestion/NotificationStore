@@ -9,4 +9,5 @@
     <color name="headingText">#E0E0E0</color>
     <color name="subHeadingText">#B0B0B0</color>
     <color name="paragraphHeadingText">#CCCCCC</color>
+    <color name="special">#FFFFFF</color>
 </resources>

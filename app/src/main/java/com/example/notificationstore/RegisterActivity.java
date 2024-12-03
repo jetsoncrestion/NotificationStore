@@ -2,9 +2,12 @@ package com.example.notificationstore;
 
 import static android.content.ContentValues.TAG;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -32,7 +35,9 @@ public class RegisterActivity extends AppCompatActivity {
     private String Name, Email, Password, ConfirmPassword;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
+    boolean isPasswordVisible = false;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +54,9 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("users");
 
+        setupPasswordVisibilityToggle(editTextPassword);
+        setupPasswordVisibilityToggle(editTextConfirmPassword);
+
         buttonSignUp.setOnClickListener(v -> {
             Name = editTextName.getText().toString().trim();
             Email = editTextEmailAddress.getText().toString().trim();
@@ -64,6 +72,32 @@ public class RegisterActivity extends AppCompatActivity {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
         });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupPasswordVisibilityToggle(EditText editText) {
+        editText.setOnTouchListener((view, motionEvent) -> {
+            int DRAWABLE_END = 2;
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if (motionEvent.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_END].getBounds().width())) {
+                    togglePasswordVisibility(editText);
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    private void togglePasswordVisibility(EditText editText) {
+        if (isPasswordVisible) {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            editText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock, 0, R.drawable.eye_show_svgrepo_com, 0);
+        } else {
+            editText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            editText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock, 0, R.drawable.eyeoff, 0);
+        }
+        isPasswordVisible = !isPasswordVisible;
+        editText.setSelection(editText.getText().length());
     }
 
     private void createAccount(String email, String password) {

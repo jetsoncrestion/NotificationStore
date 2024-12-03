@@ -2,6 +2,7 @@ package com.example.notificationstore;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -13,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationstore.Adapter.NotificationAdapter;
 import com.example.notificationstore.Model.NotificationModel;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,6 +37,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
+
+        if (!isNotificationListenerEnabled()) {
+            // If permission is not enabled, prompt the user to enable it
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent);
+        }
 
         logoutButton = findViewById(R.id.imageView2);
         RecyclerView recyclerView = findViewById(R.id.notificationRecyclerView);
@@ -56,29 +67,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNotificationsFromFirebase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("notifications");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.d(TAG, "Snapshot children count: " + snapshot.getChildrenCount());
-                notificationModels.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Log.d(TAG, "Snapshot key: " + dataSnapshot.getKey());
-                    NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
-                    if (notificationModel != null) {
-                        Log.d(TAG, "Loaded notification: " + notificationModel.getAppName());
-                        notificationModels.add(notificationModel);
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(userId)
+                    .child("notifications");
+
+            databaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    notificationModels.clear();
+
+                    if (!snapshot.exists()) {
+                        Log.d(TAG, "No notifications found for user: " + userId);
+                        return;
                     }
-                }
-                notificationAdapter.notifyDataSetChanged();
-                Log.d(TAG, "Notifications loaded: " + notificationModels.size());
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Failed to load notifications: " + error.getMessage());
-            }
-        });
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
+                        if (notificationModel != null) {
+                            notificationModels.add(notificationModel);
+                        }
+                    }
+
+                    notificationAdapter.notifyDataSetChanged();
+                    Log.d(TAG, "User-specific notifications loaded: " + notificationModels.size());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Failed to load notifications: " + error.getMessage());
+                }
+            });
+        } else {
+            Log.e(TAG, "User not authenticated. Cannot load notifications.");
+        }
+    }
+
+    private boolean isNotificationListenerEnabled() {
+        String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+        return enabledListeners != null && enabledListeners.contains(getPackageName());
     }
 }
