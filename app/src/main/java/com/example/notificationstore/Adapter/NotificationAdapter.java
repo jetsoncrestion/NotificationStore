@@ -1,6 +1,7 @@
 package com.example.notificationstore.Adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
@@ -80,15 +81,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         NotificationModel model = notificationModels.get(position);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null || user.getUid() == null) {
-            Log.e("NotificationAdapter", "User not authenticated. Cannot delete notification.");
-            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show();
+        // Get deviceId from SharedPreferences
+        String deviceId = getDeviceId(context);
+        if (deviceId == null) {
+            Log.e("NotificationAdapter", "Device ID not found. Cannot delete notification.");
+            Toast.makeText(context, "Device not recognized", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String userId = user.getUid();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId).child("notifications");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("notifications");
 
         String uniqueKey = model.getUniqueKey();
 
@@ -101,8 +105,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
 
         databaseReference.child(uniqueKey).removeValue().addOnSuccessListener(aVoid -> {
-
-//            notificationModels.remove(position);
+            // Update the RecyclerView
+            //notificationModels.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, notificationModels.size());
             Log.d("NotificationAdapter", "Notification deleted successfully.");
@@ -112,6 +116,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
         });
     }
+
+    private String getDeviceId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("DeviceID", null);
+    }
+
 
 
     @Override

@@ -1,5 +1,7 @@
 package com.example.notificationstore;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 
 public class MyNotificationListenerService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
@@ -80,37 +83,51 @@ public class MyNotificationListenerService extends NotificationListenerService {
     }
 
     private void saveNotificationToFirebase(String appName, String text, long timestamp, String appIconBase64) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = auth.getCurrentUser();
+        // Retrieve device ID
+        String deviceId = getOrGenerateDeviceId(this);
 
-        if (user != null) {
-            String userId = user.getUid();
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                    .getReference("users")
-                    .child(userId)
-                    .child("notifications");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("notifications");
 
-            String notificationId = String.valueOf(timestamp);  // You can use the timestamp as the unique key
+        String notificationId = String.valueOf(timestamp);  // Use timestamp as the unique key
 
-            NotificationModel notification = new NotificationModel();
-            notification.setUniqueKey(notificationId);  // Set the unique key (timestamp)
-            notification.setAppName(appName);
-            notification.setNotificationContent(text);
-            notification.setNotificationDateTime(timestamp);
-            notification.setAppIconBase64(appIconBase64);
+        NotificationModel notification = new NotificationModel();
+        notification.setUniqueKey(notificationId);
+        notification.setAppName(appName);
+        notification.setNotificationContent(text);
+        notification.setNotificationDateTime(timestamp);
+        notification.setAppIconBase64(appIconBase64);
 
-            if (notificationId != null) {
-                databaseReference.child(notificationId).setValue(notification)
-                        .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification saved successfully under user: " + userId))
-                        .addOnFailureListener(e -> Log.e(TAG, "Failed to save notification to Firebase.", e));
-            } else {
-                Log.e(TAG, "Failed to generate notification ID.");
-            }
+        if (notificationId != null) {
+            databaseReference.child(notificationId).setValue(notification)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification saved successfully for device: " + deviceId))
+                    .addOnFailureListener(e -> Log.e(TAG, "Failed to save notification to Firebase.", e));
         } else {
-            Log.e(TAG, "User not authenticated. Cannot save notifications.");
+            Log.e(TAG, "Failed to generate notification ID.");
         }
     }
 
+    private String getOrGenerateDeviceId(Context context) {
+        // SharedPreferences to store the device ID persistently
+        SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
+
+        // Attempt to retrieve the device ID if it exists
+        String savedDeviceId = sharedPreferences.getString("DeviceID", null);
+
+        if (savedDeviceId == null) {
+            // Generate a new UUID if no ID exists
+            savedDeviceId = UUID.randomUUID().toString();
+
+            // Save the generated UUID to SharedPreferences
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("DeviceID", savedDeviceId);
+            editor.apply(); // Commit changes
+        }
+
+        return savedDeviceId; // Return the stored or newly generated device ID
+    }
 
 
     @Override
