@@ -47,14 +47,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase
         FirebaseApp.initializeApp(this);
 
-        // Initialize views
         searchView = findViewById(R.id.searchView);
         noItemsTextView = findViewById(R.id.noItemsTextView);
 
-        // Retrieve or generate the device ID
         deviceId = getOrGenerateDeviceId(this);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -72,20 +69,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (!isNotificationListenerEnabled()) {
-            // Prompt user to enable Notification Listener
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
             startActivity(intent);
         }
 
-        // RecyclerView setup
         RecyclerView recyclerView = findViewById(R.id.notificationRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         notificationModels = new ArrayList<>();
         notificationAdapter = new NotificationAdapter(this, notificationModels);
         recyclerView.setAdapter(notificationAdapter);
-
-        // Load notifications specific to this device
         loadNotificationsFromFirebase();
     }
 
@@ -139,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // Reverse list to show the latest notifications first
                 List<NotificationModel> reversedList = new ArrayList<>();
                 for (int i = notificationModels.size() - 1; i >= 0; i--) {
                     reversedList.add(notificationModels.get(i));

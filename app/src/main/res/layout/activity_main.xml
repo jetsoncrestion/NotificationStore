@@ -16,11 +16,11 @@
         android:fontFamily="@font/orbitron"
         android:letterSpacing=".1"
         android:text="Notification List"
-        android:layout_marginStart="@dimen/_20sdp"
         android:textAlignment="center"
         android:textColor="@color/headingText"
         android:textSize="@dimen/_22ssp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,16 +47,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchView" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_24sdp"
-        android:layout_marginEnd="@dimen/_15sdp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logout" />
 
     <SearchView
         android:id="@+id/searchView"

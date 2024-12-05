@@ -110,23 +110,18 @@ public class MyNotificationListenerService extends NotificationListenerService {
     }
 
     private String getOrGenerateDeviceId(Context context) {
-        // SharedPreferences to store the device ID persistently
         SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
 
-        // Attempt to retrieve the device ID if it exists
         String savedDeviceId = sharedPreferences.getString("DeviceID", null);
 
         if (savedDeviceId == null) {
-            // Generate a new UUID if no ID exists
             savedDeviceId = UUID.randomUUID().toString();
-
-            // Save the generated UUID to SharedPreferences
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("DeviceID", savedDeviceId);
-            editor.apply(); // Commit changes
+            editor.apply();
         }
 
-        return savedDeviceId; // Return the stored or newly generated device ID
+        return savedDeviceId;
     }
 
 
