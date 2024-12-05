@@ -1,20 +1,34 @@
 package com.example.notificationstore.Model;
 
 public class NotificationModel {
+    private String uniqueKey;
     private String appName;
     private String notificationContent;
     private long notificationDateTime;
     private String appIconBase64;
+    private String imageButtonDelete;
 
-    public NotificationModel(){
-
+    // Default constructor
+    public NotificationModel() {
     }
 
-    public NotificationModel(String appName, String notificationContent, long notificationDateTime, String appIconBase64) {
+    // Constructor with parameters
+    public NotificationModel(String uniqueKey, String appName, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
+        this.uniqueKey = uniqueKey;
         this.appName = appName;
         this.notificationContent = notificationContent;
         this.notificationDateTime = notificationDateTime;
         this.appIconBase64 = appIconBase64;
+        this.imageButtonDelete = imageButtonDelete;
+    }
+
+    // Getters and setters
+    public String getUniqueKey() {
+        return uniqueKey;
+    }
+
+    public void setUniqueKey(String uniqueKey) {
+        this.uniqueKey = uniqueKey;
     }
 
     public String getAppName() {
@@ -47,5 +61,13 @@ public class NotificationModel {
 
     public void setAppIconBase64(String appIconBase64) {
         this.appIconBase64 = appIconBase64;
+    }
+
+    public String getImageButtonDelete() {
+        return imageButtonDelete;
+    }
+
+    public void setImageButtonDelete(String imageButtonDelete) {
+        this.imageButtonDelete = imageButtonDelete;
     }
 }

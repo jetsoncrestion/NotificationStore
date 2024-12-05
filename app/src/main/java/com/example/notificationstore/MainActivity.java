@@ -3,8 +3,12 @@ package com.example.notificationstore;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private NotificationAdapter notificationAdapter;
     private List<NotificationModel> notificationModels;
+    private TextView noItemsTextView;
+    private SearchView searchView;
     private FirebaseAuth mAuth;
     private ImageView logoutButton;
 
@@ -37,8 +43,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        searchView = findViewById(R.id.searchView);
+        noItemsTextView = findViewById(R.id.noItemsTextView);
 
         FirebaseApp.initializeApp(this);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filterNotifications(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterNotifications(newText);
+                return false;
+            }
+        });
 
         if (!isNotificationListenerEnabled()) {
             // If permission is not enabled, prompt the user to enable it
@@ -66,6 +88,33 @@ public class MainActivity extends AppCompatActivity {
         loadNotificationsFromFirebase();
     }
 
+    private void filterNotifications(String newText) {
+        List<NotificationModel> filteredList = new ArrayList<>();
+
+        if (!TextUtils.isEmpty(newText)) {
+            for (NotificationModel model : notificationModels) {
+                if (model != null &&
+                        model.getAppName() != null &&
+                        model.getNotificationContent() != null &&
+                        (model.getAppName().toLowerCase().contains(newText.toLowerCase()) ||
+                                model.getNotificationContent().toLowerCase().contains(newText.toLowerCase()))) {
+                    filteredList.add(model);
+                }
+            }
+        } else {
+            filteredList.addAll(notificationModels);
+        }
+
+        if (filteredList.isEmpty()) {
+            findViewById(R.id.noItemsTextView).setVisibility(View.VISIBLE); // Show the message
+        } else {
+            findViewById(R.id.noItemsTextView).setVisibility(View.GONE); // Hide the message
+        }
+
+        notificationAdapter.updateData(filteredList);
+    }
+
+
     private void loadNotificationsFromFirebase() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
@@ -77,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
                     .child(userId)
                     .child("notifications");
 
-            databaseReference.addValueEventListener(new ValueEventListener() {
+            // Order by timestamp to ensure latest notifications come first
+            databaseReference.orderByChild("timestamp").limitToLast(50).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     notificationModels.clear();
@@ -90,9 +140,22 @@ public class MainActivity extends AppCompatActivity {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
                         if (notificationModel != null) {
+                            // Set the unique key from Firebase
+                            notificationModel.setUniqueKey(dataSnapshot.getKey());
+
+                            // Add the notification to the list
                             notificationModels.add(notificationModel);
                         }
                     }
+
+                    // Reverse the list to show the latest notification first
+                    List<NotificationModel> reversedList = new ArrayList<>();
+                    for (int i = notificationModels.size() - 1; i >= 0; i--) {
+                        reversedList.add(notificationModels.get(i));
+                    }
+
+                    notificationModels.clear();
+                    notificationModels.addAll(reversedList);
 
                     notificationAdapter.notifyDataSetChanged();
                     Log.d(TAG, "User-specific notifications loaded: " + notificationModels.size());

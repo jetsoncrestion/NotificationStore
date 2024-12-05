@@ -10,7 +10,7 @@
         android:layout_width="@dimen/_300sdp"
         android:layout_height="@dimen/_100sdp"
         app:cardCornerRadius="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginBottom="@dimen/_4sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,10 +23,10 @@
 
             <ImageView
                 android:id="@+id/appIcon"
-                android:layout_width="@dimen/_64sdp"
-                android:layout_height="@dimen/_64sdp"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:contentDescription="@string/app_name"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/facebook" />
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="harry sent you a request"
-                android:layout_marginTop="@dimen/_6sdp"
+                android:layout_marginTop="@dimen/_7sdp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:layout_marginStart="@dimen/_10sdp"
@@ -64,16 +64,26 @@
                 android:id="@+id/notificationDateTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Date/Time: 2024-12-1 9:40 PM"
                 android:layout_marginBottom="@dimen/_8sdp"
-                android:layout_marginStart="@dimen/_10sdp"
+                android:ellipsize="end"
+                android:layout_marginStart="@dimen/_30sdp"
                 android:fontFamily="@font/zenantique"
                 android:maxLines="1"
-                android:ellipsize="end"
+                android:text="2024-12-1 9:40 PM"
                 android:textSize="@dimen/_14ssp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/appIcon" />
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <ImageView
+                android:id="@+id/imageButtonDelete"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:contentDescription="@string/app_name"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_15sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:srcCompat="@drawable/delete" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

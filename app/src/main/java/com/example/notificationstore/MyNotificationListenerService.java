@@ -89,9 +89,15 @@ public class MyNotificationListenerService extends NotificationListenerService {
                     .getReference("users")
                     .child(userId)
                     .child("notifications");
-            String notificationId = databaseReference.push().getKey();
 
-            NotificationModel notification = new NotificationModel(appName, text, timestamp, appIconBase64);
+            String notificationId = String.valueOf(timestamp);  // You can use the timestamp as the unique key
+
+            NotificationModel notification = new NotificationModel();
+            notification.setUniqueKey(notificationId);  // Set the unique key (timestamp)
+            notification.setAppName(appName);
+            notification.setNotificationContent(text);
+            notification.setNotificationDateTime(timestamp);
+            notification.setAppIconBase64(appIconBase64);
 
             if (notificationId != null) {
                 databaseReference.child(notificationId).setValue(notification)
@@ -104,6 +110,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
             Log.e(TAG, "User not authenticated. Cannot save notifications.");
         }
     }
+
 
 
     @Override
