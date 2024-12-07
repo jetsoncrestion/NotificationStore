@@ -105,7 +105,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
 
         databaseReference.child(uniqueKey).removeValue().addOnSuccessListener(aVoid -> {
-            // Update the RecyclerView
+
             //notificationModels.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, notificationModels.size());

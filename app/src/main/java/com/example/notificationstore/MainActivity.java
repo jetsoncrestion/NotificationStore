@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         searchView = findViewById(R.id.searchView);
         noItemsTextView = findViewById(R.id.noItemsTextView);
 
-        deviceId = getOrGenerateDeviceId(this);
+        deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -156,20 +156,20 @@ public class MainActivity extends AppCompatActivity {
         return enabledListeners != null && enabledListeners.contains(getPackageName());
     }
 
-    private String getOrGenerateDeviceId(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String savedDeviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
-
-        if (savedDeviceId == null) {
-            // Generate a new UUID
-            savedDeviceId = UUID.randomUUID().toString();
-
-            // Save it to SharedPreferences
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(DEVICE_ID_KEY, savedDeviceId);
-            editor.apply();
-        }
-
-        return savedDeviceId;
-    }
+//    private String getOrGenerateDeviceId(Context context) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+//        String savedDeviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
+//
+//        if (savedDeviceId == null) {
+//            // Generate a new UUID
+//            savedDeviceId = UUID.randomUUID().toString();
+//
+//            // Save it to SharedPreferences
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            editor.putString(DEVICE_ID_KEY, savedDeviceId);
+//            editor.apply();
+//        }
+//
+//        return savedDeviceId;
+//    }
 }

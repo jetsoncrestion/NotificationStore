@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.notification.NotificationListenerService;
@@ -14,19 +15,19 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.example.notificationstore.Model.NotificationModel;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class MyNotificationListenerService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
-    private static String lastNotificationKey = null; // To track the last notification's unique key
-    private static long lastSavedTime = 0; // To track the last saved notification's timestamp
-    private static final long MINIMUM_INTERVAL = 5000; // Minimum interval in milliseconds (5 seconds)
+    private static String lastNotificationKey = null;
+    private static long lastSavedTime = 0;
+    private static final long MINIMUM_INTERVAL = 5000;
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -35,7 +36,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
         String text = sbn.getNotification().extras.getString("android.text");
         long timestamp = sbn.getPostTime();
 
-        // Log incoming notification details
         Log.d(TAG, "Notification received: " + packageName + " - " + title + " - " + text);
 
         if (title == null || text == null) {
@@ -43,11 +43,33 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
+        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
+
+        // Log the selected apps to verify
+        Log.d(TAG, "Selected apps: " + selectedApps);
+
+        if (!selectedApps.contains(packageName)) {
+            Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
+            return;
+        }
+
+
+//        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+//        Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
+//        Log.d(TAG, "Selected apps from SharedPreferences: " + selectedApps);
+//
+//        if (!selectedApps.contains(packageName)) {
+//            Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
+//            return;
+//        }
+
         if (packageName.equals("com.android.systemui")) {
             Log.d(TAG, "Ignored notification from System UI.");
             return;
         }
 
+        // Deduplication logic
         String currentNotificationKey = packageName + "|" + title + "|" + text;
 
         if (currentNotificationKey.equals(lastNotificationKey)) {
@@ -73,18 +95,15 @@ public class MyNotificationListenerService extends NotificationListenerService {
             appIconBase64 = drawableToBase64(appIconDrawable);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "App not found: " + packageName, e);
-            appName = packageName; // Fallback to package name if app info is not found
+            appName = packageName;
         }
-
-        // Log the values before saving to Firebase
-        Log.d(TAG, "Saving notification: " + appName + " - " + text + " - " + timestamp);
 
         saveNotificationToFirebase(appName, text, timestamp, appIconBase64);
     }
 
     private void saveNotificationToFirebase(String appName, String text, long timestamp, String appIconBase64) {
         // Retrieve device ID
-        String deviceId = getOrGenerateDeviceId(this);
+        String deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference("devices")
@@ -109,72 +128,49 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
     }
 
-    private String getOrGenerateDeviceId(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
-
-        String savedDeviceId = sharedPreferences.getString("DeviceID", null);
-
-        if (savedDeviceId == null) {
-            savedDeviceId = UUID.randomUUID().toString();
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("DeviceID", savedDeviceId);
-            editor.apply();
-        }
-
-        return savedDeviceId;
-    }
-
-
-    @Override
-    public void onNotificationRemoved(StatusBarNotification sbn) {
-        // Handle notification removal if needed
-        Log.d(TAG, "Notification removed: " + sbn.getPackageName());
-    }
-
     private String drawableToBase64(Drawable drawable) {
-        if (drawable == null) {
-            Log.e(TAG, "Drawable is null. Cannot convert to Base64.");
-            return null;
-        }
+        Bitmap bitmap = null;
 
-        Bitmap bitmap;
+        // Check if the drawable is BitmapDrawable
         if (drawable instanceof BitmapDrawable) {
             bitmap = ((BitmapDrawable) drawable).getBitmap();
+        }
+        // If the drawable is AdaptiveIconDrawable, handle it differently
+        else if (drawable instanceof AdaptiveIconDrawable) {
+            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
+            Drawable foregroundDrawable = adaptiveIconDrawable.getForeground();
+            if (foregroundDrawable instanceof BitmapDrawable) {
+                bitmap = ((BitmapDrawable) foregroundDrawable).getBitmap();
+            } else {
+                // If the foreground is not a BitmapDrawable, we can try to use the background or handle as needed.
+                // For simplicity, we'll skip processing if we can't handle it.
+                Log.e(TAG, "Unable to convert AdaptiveIconDrawable to Bitmap.");
+            }
         } else {
-            // Handle vector or other drawable types by converting them to a Bitmap
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
+            Log.e(TAG, "Unknown drawable type: " + drawable.getClass().getSimpleName());
         }
 
-        // Resize the bitmap to avoid large icons
-        bitmap = resizeBitmap(bitmap, 128, 128);
-
         if (bitmap != null) {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            byte[] byteArray = outputStream.toByteArray();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
             return Base64.encodeToString(byteArray, Base64.DEFAULT);
         } else {
-            Log.e(TAG, "Bitmap is null. Cannot convert to Base64.");
+            Log.e(TAG, "Drawable could not be converted to Bitmap.");
             return null;
         }
     }
 
 
-    private Bitmap resizeBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
-        float aspectRatio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
-        int newWidth = maxWidth;
-        int newHeight = maxHeight;
-
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            newHeight = (int) (newWidth / aspectRatio);
-        } else {
-            newWidth = (int) (newHeight * aspectRatio);
-        }
-
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
-    }
-
+//    private String getOrGenerateDeviceId(Context context) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+//        String deviceId = sharedPreferences.getString("deviceId", null);
+//
+//        if (deviceId == null) {
+//            deviceId = UUID.randomUUID().toString();
+//            sharedPreferences.edit().putString("deviceId", deviceId).apply();
+//        }
+//
+//        return deviceId;
+//    }
 }

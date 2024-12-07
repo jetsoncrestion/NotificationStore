@@ -2,12 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationStore"
         tools:targetApi="31">
+        <activity
+            android:name=".AppSelectionActivity"
+            android:exported="false" />
 
         <service
             android:name=".MyNotificationListenerService"
@@ -32,10 +38,9 @@
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
-
         <activity
-        android:name=".RegisterActivity"
-        android:exported="false" />
+            android:name=".RegisterActivity"
+            android:exported="false" />
         <activity
             android:name=".SplashScreen"
             android:exported="true">
