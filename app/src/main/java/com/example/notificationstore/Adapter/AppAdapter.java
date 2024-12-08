@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,41 +38,45 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AppModel app = appModels.get(position);
-
-        // Bind app data to the ViewHolder
         holder.appName.setText(app.getAppName());
         holder.appIcon.setImageDrawable(app.getAppIcon());
-        holder.appCheckbox.setOnCheckedChangeListener(null);
-        holder.appCheckbox.setChecked(app.isSelected());
+        holder.toggleSwitch.setOnCheckedChangeListener(null);
+        holder.toggleSwitch.setChecked(app.isSelected());
 
-        // Handle checkbox state changes
-        holder.appCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
+        holder.toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
+
+//        // Bind app data to the ViewHolder
+//        holder.appName.setText(app.getAppName());
+//        holder.appIcon.setImageDrawable(app.getAppIcon());
+//        holder.appCheckbox.setOnCheckedChangeListener(null);
+//        holder.appCheckbox.setChecked(app.isSelected());
+//
+//        // Handle checkbox state changes
+//        holder.appCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
     }
 
     @Override
     public int getItemCount() {
         return appModels.size();
     }
-
-    // Get the list of selected apps
     public List<String> getSelectedApps() {
         // Return package names of selected apps
         return appModels.stream()
                 .filter(AppModel::isSelected)
-                .map(AppModel::getPackageName) // Ensure only package names are retrieved
+                .map(AppModel::getPackageName)
                 .collect(Collectors.toList());
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView appName;
         final ImageView appIcon;
-        final CheckBox appCheckbox;
+        final SwitchMaterial toggleSwitch;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             appName = itemView.findViewById(R.id.appName);
             appIcon = itemView.findViewById(R.id.appIcon);
-            appCheckbox = itemView.findViewById(R.id.checkBox);
+            toggleSwitch = itemView.findViewById(R.id.toggleSwitch);
         }
     }
 }

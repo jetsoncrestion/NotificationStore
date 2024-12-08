@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private List<NotificationModel> notificationModels;
     private TextView noItemsTextView;
     private SearchView searchView;
+    private Button updateSelectionButton;
     private String deviceId;
 
     @Override
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         searchView = findViewById(R.id.searchView);
         noItemsTextView = findViewById(R.id.noItemsTextView);
+        updateSelectionButton = findViewById(R.id.updateSelectionButton);
 
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
@@ -66,6 +69,13 @@ public class MainActivity extends AppCompatActivity {
                 filterNotifications(newText);
                 return false;
             }
+        });
+
+        updateSelectionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
+            intent.putExtra("isRevisiting", true);
+            startActivity(intent);
+            finish();
         });
 
         if (!isNotificationListenerEnabled()) {
@@ -155,21 +165,4 @@ public class MainActivity extends AppCompatActivity {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         return enabledListeners != null && enabledListeners.contains(getPackageName());
     }
-
-//    private String getOrGenerateDeviceId(Context context) {
-//        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-//        String savedDeviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
-//
-//        if (savedDeviceId == null) {
-//            // Generate a new UUID
-//            savedDeviceId = UUID.randomUUID().toString();
-//
-//            // Save it to SharedPreferences
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putString(DEVICE_ID_KEY, savedDeviceId);
-//            editor.apply();
-//        }
-//
-//        return savedDeviceId;
-//    }
 }

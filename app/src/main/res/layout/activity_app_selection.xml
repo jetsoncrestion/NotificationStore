@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context=".AppSelectionActivity">
 
     <TextView
@@ -13,10 +14,10 @@
         android:layout_height="wrap_content"
         android:text="Select Apps for Notification"
         android:layout_marginTop="@dimen/_8sdp"
-        android:fontFamily="@font/orbitron"
-        android:textSize="@dimen/_24ssp"
+        android:fontFamily="@font/google"
+        android:textSize="@dimen/_28ssp"
         android:textAlignment="center"
-        android:letterSpacing=".1"
+        android:letterSpacing=".01"
         android:textStyle="bold"
         android:textColor="@color/headingText"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,7 +27,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_6sdp"
         android:id="@+id/recyclerView"
         android:layout_marginBottom="@dimen/_15sdp"
         app:layout_constraintBottom_toTopOf="@+id/button"

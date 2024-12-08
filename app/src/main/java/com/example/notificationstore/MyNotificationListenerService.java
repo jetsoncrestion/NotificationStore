@@ -129,25 +129,28 @@ public class MyNotificationListenerService extends NotificationListenerService {
     }
 
     private String drawableToBase64(Drawable drawable) {
+        int targetWidth = convertToPx(90);
+        int targetHeight = convertToPx(90);
         Bitmap bitmap = null;
 
-        // Check if the drawable is BitmapDrawable
         if (drawable instanceof BitmapDrawable) {
-            bitmap = ((BitmapDrawable) drawable).getBitmap();
-        }
-        // If the drawable is AdaptiveIconDrawable, handle it differently
-        else if (drawable instanceof AdaptiveIconDrawable) {
-            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
-            Drawable foregroundDrawable = adaptiveIconDrawable.getForeground();
-            if (foregroundDrawable instanceof BitmapDrawable) {
-                bitmap = ((BitmapDrawable) foregroundDrawable).getBitmap();
-            } else {
-                // If the foreground is not a BitmapDrawable, we can try to use the background or handle as needed.
-                // For simplicity, we'll skip processing if we can't handle it.
-                Log.e(TAG, "Unable to convert AdaptiveIconDrawable to Bitmap.");
-            }
-        } else {
-            Log.e(TAG, "Unknown drawable type: " + drawable.getClass().getSimpleName());
+            bitmap = Bitmap.createScaledBitmap(
+                    ((BitmapDrawable) drawable).getBitmap(),
+                    targetWidth,
+                    targetHeight,
+                    true
+            );
+        } else if (drawable instanceof AdaptiveIconDrawable) {
+            Bitmap tempBitmap = Bitmap.createBitmap(
+                    drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(),
+                    Bitmap.Config.ARGB_8888
+            );
+            Canvas canvas = new Canvas(tempBitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+
+            bitmap = Bitmap.createScaledBitmap(tempBitmap, targetWidth, targetHeight, true);
         }
 
         if (bitmap != null) {
@@ -161,16 +164,8 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
     }
 
-
-//    private String getOrGenerateDeviceId(Context context) {
-//        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-//        String deviceId = sharedPreferences.getString("deviceId", null);
-//
-//        if (deviceId == null) {
-//            deviceId = UUID.randomUUID().toString();
-//            sharedPreferences.edit().putString("deviceId", deviceId).apply();
-//        }
-//
-//        return deviceId;
-//    }
+    private int convertToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
 }

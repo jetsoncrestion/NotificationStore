@@ -18,8 +18,8 @@
         <shape android:shape="rectangle">
             <gradient
                 android:angle="45"
-                android:startColor="#FFC107"
-                android:endColor="#FF9800" /> <!-- Gradient color when button is in normal state -->
+                android:startColor="#522550"
+                android:endColor="#522550" /> <!-- Gradient color when button is in normal state -->
             <corners android:radius="16dp" />
             <stroke android:width="2dp" android:color="#F57C00" />
         </shape>
