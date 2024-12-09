@@ -7,10 +7,11 @@
     android:background="@color/background">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="@dimen/_285sdp"
+        android:layout_width="@dimen/_290sdp"
         android:layout_height="@dimen/_100sdp"
         app:cardCornerRadius="@dimen/_16sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,29 +48,19 @@
                 app:layout_constraintStart_toEndOf="@+id/appIcon"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.core.widget.NestedScrollView
+            <TextView
+                android:id="@+id/notificationContent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="horizontal"
+                android:text="harry sent you a request"
+                android:layout_marginTop="@dimen/_7sdp"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:layout_marginStart="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_8sdp"
+                android:fontFamily="@font/roboto"
+                android:textSize="@dimen/_16ssp"
                 app:layout_constraintStart_toEndOf="@+id/appIcon"
-                app:layout_constraintTop_toBottomOf="@+id/appName">
-
-                <TextView
-                    android:id="@+id/notificationContent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="harry sent you a request"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:fontFamily="@font/roboto"
-                    android:textSize="@dimen/_16ssp"
-                    android:singleLine="true"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:scrollHorizontally="true" />
-            </androidx.core.widget.NestedScrollView>
+                app:layout_constraintTop_toBottomOf="@+id/appName" />
 
             <TextView
                 android:id="@+id/notificationDateTime"
@@ -82,7 +73,7 @@
                 android:maxLines="1"
                 android:textColor="@color/special"
                 android:text="2024-12-1 9:40 PM"
-                android:textSize="@dimen/_14ssp"
+                android:textSize="@dimen/_12ssp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 

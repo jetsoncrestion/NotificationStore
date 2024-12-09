@@ -1,0 +1,9 @@
+<resources>
+    <!-- Define custom style for menu item text -->
+    <style name="PopupMenuTextStyle">
+        <item name="android:textColor">@color/headingText</item> <!-- Define the color in colors.xml -->
+        <item name="android:textSize">18sp</item> <!-- Set the font size -->
+        <item name="android:textStyle">bold</item> <!-- Make the text bold -->
+        <item name="android:fontFamily">@font/roboto</item>
+    </style>
+</resources>

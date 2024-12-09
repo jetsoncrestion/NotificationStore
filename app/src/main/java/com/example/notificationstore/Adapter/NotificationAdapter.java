@@ -104,25 +104,38 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             return;
         }
 
-        databaseReference.child(uniqueKey).removeValue().addOnSuccessListener(aVoid -> {
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("deleted_notifications")
+                .child(uniqueKey);
 
-            //notificationModels.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, notificationModels.size());
-            Log.d("NotificationAdapter", "Notification deleted successfully.");
-            Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Log.e("NotificationAdapter", "Failed to delete notification: " + e.getMessage());
-            Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
-        });
+        deletedNotificationsRef.setValue(model)
+                .addOnSuccessListener(aVoid -> {
+                    // Delete from "notifications" node after saving in "deleted_notifications"
+                    databaseReference.child(uniqueKey).removeValue()
+                            .addOnSuccessListener(aVoid1 -> {
+                                //notificationModels.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, notificationModels.size());
+                                Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
+                                Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
+                                Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("NotificationAdapter", "Failed to save notification to deleted_notifications: " + e.getMessage());
+                    Toast.makeText(context, "Failed to save deleted notification", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private String getDeviceId(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getString("DeviceID", null);
     }
-
-
 
     @Override
     public int getItemCount() {

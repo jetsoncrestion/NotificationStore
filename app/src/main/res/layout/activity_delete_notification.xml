@@ -6,31 +6,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".SplashScreen">
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="logo"
-        android:layout_marginTop="@dimen/_90sdp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo" />
+    tools:context=".DeleteNotificationActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/noDeletedItemsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Notification Store"
+        android:text="Deleted Notification"
+        android:layout_marginTop="@dimen/_4sdp"
         android:fontFamily="serif"
-        android:layout_marginTop="@dimen/_15sdp"
-        android:textSize="@dimen/_28ssp"
-        android:letterSpacing=".02"
+        android:textSize="@dimen/_24sdp"
         android:textStyle="bold"
         android:textColor="@color/headingText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/deleteNotificationRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/noDeletedItemsTextView" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

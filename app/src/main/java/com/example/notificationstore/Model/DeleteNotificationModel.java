@@ -1,6 +1,6 @@
 package com.example.notificationstore.Model;
 
-public class NotificationModel {
+public class DeleteNotificationModel {
     private String uniqueKey;
     private String appName;
     private long timeStamp;
@@ -9,12 +9,12 @@ public class NotificationModel {
     private String appIconBase64;
     private String imageButtonDelete;
 
-    // Default constructor
-    public NotificationModel() {
+
+    public DeleteNotificationModel() {
+        // Default constructor required for Firebase
     }
 
-    // Constructor with parameters
-    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
+    public DeleteNotificationModel(String uniqueKey, String appName, long timeStamp, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
         this.uniqueKey = uniqueKey;
         this.appName = appName;
         this.timeStamp = timeStamp;
@@ -24,7 +24,6 @@ public class NotificationModel {
         this.imageButtonDelete = imageButtonDelete;
     }
 
-    // Getters and setters
     public String getUniqueKey() {
         return uniqueKey;
     }
@@ -40,9 +39,11 @@ public class NotificationModel {
     public void setAppName(String appName) {
         this.appName = appName;
     }
+
     public long getTimeStamp() {
         return timeStamp;
     }
+
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }

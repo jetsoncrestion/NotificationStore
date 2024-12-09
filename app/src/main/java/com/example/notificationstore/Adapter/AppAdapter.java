@@ -44,15 +44,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         holder.toggleSwitch.setChecked(app.isSelected());
 
         holder.toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
-
-//        // Bind app data to the ViewHolder
-//        holder.appName.setText(app.getAppName());
-//        holder.appIcon.setImageDrawable(app.getAppIcon());
-//        holder.appCheckbox.setOnCheckedChangeListener(null);
-//        holder.appCheckbox.setChecked(app.isSelected());
-//
-//        // Handle checkbox state changes
-//        holder.appCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
     }
 
     @Override

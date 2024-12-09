@@ -11,4 +11,11 @@
     <color name="subHeadingText">#4D4D4D</color>
     <color name="paragraphHeadingText">#5A5A5A</color>
     <color name="transparent">#00000000</color>
+
+    <color name="switch_thumb_off">#B0B0B0</color>
+    <color name="switch_track_off">#DCDCDC</color>
+
+    <color name="switch_thumb_on">#2196F3</color>
+    <color name="switch_track_on">#BBDEFB</color>
+
 </resources>

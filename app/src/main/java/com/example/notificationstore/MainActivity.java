@@ -3,19 +3,31 @@ package com.example.notificationstore;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.fonts.FontFamily;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private List<NotificationModel> notificationModels;
     private TextView noItemsTextView;
     private SearchView searchView;
-    private Button updateSelectionButton;
+    private ImageView imageMenuActionBar;
     private String deviceId;
 
     @Override
@@ -53,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         searchView = findViewById(R.id.searchView);
         noItemsTextView = findViewById(R.id.noItemsTextView);
-        updateSelectionButton = findViewById(R.id.updateSelectionButton);
+        imageMenuActionBar = findViewById(R.id.imageMenuActionBar);
 
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
@@ -71,11 +83,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        updateSelectionButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
-            intent.putExtra("isRevisiting", true);
-            startActivity(intent);
-            finish();
+        imageMenuActionBar.setOnClickListener(v -> {
+            showPopupMenu(v);
         });
 
         if (!isNotificationListenerEnabled()) {
@@ -90,6 +99,65 @@ public class MainActivity extends AppCompatActivity {
         notificationAdapter = new NotificationAdapter(this, notificationModels);
         recyclerView.setAdapter(notificationAdapter);
         loadNotificationsFromFirebase();
+    }
+
+    private void showPopupMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        MenuInflater inflater = popupMenu.getMenuInflater();
+        inflater.inflate(R.menu.main_menu, popupMenu.getMenu());
+
+        MenuItem actionUpdateSelection = popupMenu.getMenu().findItem(R.id.action_update_selection);
+        MenuItem actionViewDeleted = popupMenu.getMenu().findItem(R.id.action_view_deleted);
+
+        // Apply custom styling
+        applyPopupMenuItemStyle(actionUpdateSelection);
+        applyPopupMenuItemStyle(actionViewDeleted);
+
+        // Handle menu item clicks
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_update_selection) {
+                openAppSelectionActivity();
+                return true;
+            } else if (item.getItemId() == R.id.action_view_deleted) {
+                Intent intent = new Intent(MainActivity.this, DeleteNotificationActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    private void applyPopupMenuItemStyle(MenuItem item) {
+        SpannableString styledText = new SpannableString(item.getTitle());
+
+        int textColor = getResources().getColor(R.color.headingText);
+        int textSize = 20;  // In sp (scaled pixels)
+        Typeface typeface = ResourcesCompat.getFont(this, R.font.roboto);
+
+        styledText.setSpan(new ForegroundColorSpan(textColor), 0, styledText.length(), 0);
+        styledText.setSpan(new StyleSpan(Typeface.BOLD), 0, styledText.length(), 0);
+        styledText.setSpan(new AbsoluteSizeSpan(textSize, true), 0, styledText.length(), 0);
+        //styledText.setSpan(new CustomTypefaceSpan(R.font.roboto, typeface), 0, styledText.length(), 0);
+
+        item.setTitle(styledText);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks here.
+        if (item.getItemId() == R.id.action_update_selection) {
+            openAppSelectionActivity();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void filterNotifications(String newText) {
@@ -164,5 +232,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean isNotificationListenerEnabled() {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         return enabledListeners != null && enabledListeners.contains(getPackageName());
+    }
+
+    private void openAppSelectionActivity() {
+        // Functionality to open App Selection Activity
+        Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
+        intent.putExtra("isRevisiting", true);
+        startActivity(intent);
+        finish();
     }
 }
