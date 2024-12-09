@@ -192,24 +192,47 @@ public class MainActivity extends AppCompatActivity {
                 .child(deviceId)
                 .child("notifications");
 
-        databaseReference.orderByChild("timestamp").limitToLast(50).addValueEventListener(new ValueEventListener() {
+        long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+        long currentTime = System.currentTimeMillis();
+
+        databaseReference.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 notificationModels.clear();
 
-                if (!snapshot.exists()) {
-                    Log.d(TAG, "No notifications found for device: " + deviceId);
-                    return;
-                }
-
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
+
                     if (notificationModel != null) {
-                        notificationModel.setUniqueKey(dataSnapshot.getKey());
-                        notificationModels.add(notificationModel);
+                        long notificationTime = notificationModel.getNotificationDateTime();
+
+                        if (notificationTime < (currentTime - thirtyDaysInMillis)) {
+                            // Delete old notifications
+                            String uniqueKey = dataSnapshot.getKey();
+
+                            DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
+                                    .getReference("devices")
+                                    .child(deviceId)
+                                    .child("deleted_notifications")
+                                    .child(uniqueKey);
+
+                            deletedNotificationsRef.setValue(notificationModel)
+                                    .addOnSuccessListener(aVoid -> {
+                                        databaseReference.child(uniqueKey).removeValue();
+                                        Log.d(TAG, "Old notification deleted: " + uniqueKey);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Failed to delete old notification: " + e.getMessage());
+                                    });
+                        } else {
+                            // Add recent notifications to the list
+                            notificationModel.setUniqueKey(dataSnapshot.getKey());
+                            notificationModels.add(notificationModel);
+                        }
                     }
                 }
 
+                // Reverse the list to display most recent notifications first
                 List<NotificationModel> reversedList = new ArrayList<>();
                 for (int i = notificationModels.size() - 1; i >= 0; i--) {
                     reversedList.add(notificationModels.get(i));
@@ -228,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private boolean isNotificationListenerEnabled() {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
