@@ -11,9 +11,11 @@
     <color name="paragraphHeadingText">#CCCCCC</color>
     <color name="special">#FFFFFF</color>
 
-    <color name="switch_thumb_off">#666666</color> <!-- Darker gray when OFF -->
-    <color name="switch_track_off">#444444</color> <!-- Darker track when OFF -->
 
-    <color name="switch_thumb_on">#0091EA</color> <!-- Bright Blue when ON -->
-    <color name="switch_track_on">#1E88E5</color> <!-- Darker blue track when ON -->
+    <color name="switch_thumb_off">#90A4AE</color> <!-- Slightly darker gray for thumb -->
+    <color name="switch_track_off">#B0BEC5</color> <!-- Lighter gray for track -->
+
+    <!-- ON State (Blue tones) -->
+    <color name="switch_thumb_on">#1E88E5</color> <!-- Strong blue for thumb -->
+    <color name="switch_track_on">#81D4FA</color> <!-- Soft Blue for Track -->
 </resources>

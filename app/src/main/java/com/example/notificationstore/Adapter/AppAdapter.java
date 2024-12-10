@@ -1,15 +1,19 @@
 package com.example.notificationstore.Adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationstore.Model.AppModel;
@@ -30,9 +34,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.app_item_layout, parent, false);
-        return new ViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_item_layout, parent, false);
+        return new ViewHolder(view, context);
     }
 
     @Override
@@ -40,34 +43,58 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         AppModel app = appModels.get(position);
         holder.appName.setText(app.getAppName());
         holder.appIcon.setImageDrawable(app.getAppIcon());
+
+        boolean isChecked = app.isSelected();
         holder.toggleSwitch.setOnCheckedChangeListener(null);
         holder.toggleSwitch.setChecked(app.isSelected());
+        holder.updateSwitchColors(isChecked);
 
-        holder.toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> app.setSelected(isChecked));
+        holder.toggleSwitch.setOnCheckedChangeListener((buttonView, isCheckedNew) -> {
+            app.setSelected(isCheckedNew);
+            holder.updateSwitchColors(isCheckedNew);
+        });
     }
 
     @Override
     public int getItemCount() {
         return appModels.size();
     }
+
     public List<String> getSelectedApps() {
         // Return package names of selected apps
-        return appModels.stream()
-                .filter(AppModel::isSelected)
-                .map(AppModel::getPackageName)
-                .collect(Collectors.toList());
+        return appModels.stream().filter(AppModel::isSelected).map(AppModel::getPackageName).collect(Collectors.toList());
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView appName;
         final ImageView appIcon;
-        final SwitchMaterial toggleSwitch;
+        final Switch toggleSwitch;
 
-        public ViewHolder(@NonNull View itemView) {
+        private final int thumbOnColor;
+        private final int thumbOffColor;
+        private final int trackOnColor;
+        private final int trackOffColor;
+
+        public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             appName = itemView.findViewById(R.id.appName);
             appIcon = itemView.findViewById(R.id.appIcon);
             toggleSwitch = itemView.findViewById(R.id.toggleSwitch);
+
+            thumbOnColor = ContextCompat.getColor(context, R.color.switch_thumb_on);
+            thumbOffColor = ContextCompat.getColor(context, R.color.switch_thumb_off);
+            trackOnColor = ContextCompat.getColor(context, R.color.switch_track_on);
+            trackOffColor = ContextCompat.getColor(context, R.color.switch_track_off);
+        }
+
+        void updateSwitchColors(boolean isChecked) {
+            if (isChecked) {
+                toggleSwitch.setThumbTintList(ColorStateList.valueOf(thumbOnColor));
+                toggleSwitch.setTrackTintList(ColorStateList.valueOf(trackOnColor));
+            } else {
+                toggleSwitch.setThumbTintList(ColorStateList.valueOf(thumbOffColor));
+                toggleSwitch.setTrackTintList(ColorStateList.valueOf(trackOffColor));
+            }
         }
     }
 }

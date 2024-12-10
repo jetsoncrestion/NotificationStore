@@ -47,7 +47,7 @@
                 app:layout_constraintStart_toEndOf="@+id/appIcon"
                 app:layout_constraintTop_toTopOf="@+id/appIcon" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <Switch
                 android:id="@+id/toggleSwitch"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="wrap_content"
@@ -56,12 +56,13 @@
                 android:scaleY="1.5"
                 android:text=""
                 android:thumbTint="@color/switch_thumb_off"
-                android:thumbTintMode="src_in"
+
                 android:trackTint="@color/switch_track_off"
-                android:trackTintMode="src_in"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
