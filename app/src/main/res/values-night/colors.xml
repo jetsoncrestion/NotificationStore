@@ -12,10 +12,10 @@
     <color name="special">#FFFFFF</color>
 
 
-    <color name="switch_thumb_off">#90A4AE</color> <!-- Slightly darker gray for thumb -->
-    <color name="switch_track_off">#B0BEC5</color> <!-- Lighter gray for track -->
+    <color name="switch_thumb_off">#90A4AE</color>
+    <color name="switch_track_off">#B0BEC5</color>
 
     <!-- ON State (Blue tones) -->
-    <color name="switch_thumb_on">#1E88E5</color> <!-- Strong blue for thumb -->
-    <color name="switch_track_on">#81D4FA</color> <!-- Soft Blue for Track -->
+    <color name="switch_thumb_on">#1E88E5</color>
+    <color name="switch_track_on">#81D4FA</color>
 </resources>
