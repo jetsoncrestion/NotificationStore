@@ -1,10 +1,18 @@
 package com.example.notificationstore;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,12 +34,14 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
     private DeleteNotificationAdapter notificationAdapter;
     private List<DeleteNotificationModel> deletedNotificationModels;
     private String deviceId;
+    private ImageView imageBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete_notification);
 
+        imageBack = findViewById(R.id.imageBack);
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
         recyclerView = findViewById(R.id.deleteNotificationRecyclerView);
@@ -66,6 +76,10 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
                 Log.e("LoadDeleted", "Failed to load deleted notifications: " + error.getMessage());
             }
         });
+
+        imageBack.setOnClickListener(v -> {
+            finish();
+        });
     }
 
     @Override
@@ -74,7 +88,6 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
 
         deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnSuccessListener(aVoid -> {
             Toast.makeText(this, "Notification deleted permanently", Toast.LENGTH_SHORT).show();
-            //deletedNotificationModels.remove(position);
             notificationAdapter.notifyItemRemoved(position);
         }).addOnFailureListener(e -> {
             Log.e("DeleteNotification", "Failed to delete notification: " + e.getMessage());
@@ -85,12 +98,9 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
     @Override
     public void onRestoreNotification(DeleteNotificationModel model, int position) {
         DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
-
         DatabaseReference activeNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
 
-        // Move the notification to active notifications
         activeNotificationsRef.push().setValue(model).addOnSuccessListener(aVoid -> {
-            // Remove it from the deleted notifications list
             deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnSuccessListener(aVoid1 -> {
                 Toast.makeText(this, "Notification restored", Toast.LENGTH_SHORT).show();
                 notificationAdapter.notifyItemRemoved(position);
@@ -103,5 +113,33 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
             Toast.makeText(this, "Failed to restore notification", Toast.LENGTH_SHORT).show();
         });
     }
+
+    @Override
+    public void onNotificationLongPressed(DeleteNotificationModel model, int position) {
+        View customView = getLayoutInflater().inflate(R.layout.custom_alert_dialog, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(customView)
+                .create();
+
+        Button restoreButton = customView.findViewById(R.id.restoreButton);
+        Button deleteButton = customView.findViewById(R.id.deleteButton);
+        Button cancelButton = customView.findViewById(R.id.cancelButton);
+
+        restoreButton.setOnClickListener(v -> {
+            onRestoreNotification(model, position);
+            dialog.dismiss();
+        });
+
+        deleteButton.setOnClickListener(v -> {
+            onDeleteNotification(model, position);
+            dialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
 
 }

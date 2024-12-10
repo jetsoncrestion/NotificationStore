@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private List<NotificationModel> notificationModels;
     private TextView noItemsTextView;
     private SearchView searchView;
-    private ImageView imageMenuActionBar;
+    private ImageView imageMenuActionBar, imageBack;
     private String deviceId;
 
     @Override
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         searchView = findViewById(R.id.searchView);
         noItemsTextView = findViewById(R.id.noItemsTextView);
         imageMenuActionBar = findViewById(R.id.imageMenuActionBar);
+        imageBack = findViewById(R.id.imageBack);
 
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
@@ -85,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
 
         imageMenuActionBar.setOnClickListener(v -> {
             showPopupMenu(v);
+        });
+
+        imageBack.setOnClickListener(v -> {
+            finish();
         });
 
         if (!isNotificationListenerEnabled()) {
@@ -116,8 +121,10 @@ public class MainActivity extends AppCompatActivity {
         // Handle menu item clicks
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_update_selection) {
-                openAppSelectionActivity();
-                return true;
+                Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
+                intent.putExtra("isRevisiting", true);
+                startActivity(intent);
+                finish();
             } else if (item.getItemId() == R.id.action_view_deleted) {
                 Intent intent = new Intent(MainActivity.this, DeleteNotificationActivity.class);
                 startActivity(intent);
@@ -154,11 +161,16 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Handle action bar item clicks here.
         if (item.getItemId() == R.id.action_update_selection) {
-            openAppSelectionActivity();
+            // Directly apply the intent inside the if block
+            Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
+            intent.putExtra("isRevisiting", true);
+            startActivity(intent);
+            finish(); // Finish MainActivity to prevent the user from going back
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     private void filterNotifications(String newText) {
         List<NotificationModel> filteredList = new ArrayList<>();
@@ -192,47 +204,24 @@ public class MainActivity extends AppCompatActivity {
                 .child(deviceId)
                 .child("notifications");
 
-        long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000; // 30 days in milliseconds
-        long currentTime = System.currentTimeMillis();
-
-        databaseReference.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("timestamp").limitToLast(50).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 notificationModels.clear();
 
+                if (!snapshot.exists()) {
+                    Log.d(TAG, "No notifications found for device: " + deviceId);
+                    return;
+                }
+
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
-
                     if (notificationModel != null) {
-                        long notificationTime = notificationModel.getNotificationDateTime();
-
-                        if (notificationTime < (currentTime - thirtyDaysInMillis)) {
-                            // Delete old notifications
-                            String uniqueKey = dataSnapshot.getKey();
-
-                            DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                                    .getReference("devices")
-                                    .child(deviceId)
-                                    .child("deleted_notifications")
-                                    .child(uniqueKey);
-
-                            deletedNotificationsRef.setValue(notificationModel)
-                                    .addOnSuccessListener(aVoid -> {
-                                        databaseReference.child(uniqueKey).removeValue();
-                                        Log.d(TAG, "Old notification deleted: " + uniqueKey);
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Failed to delete old notification: " + e.getMessage());
-                                    });
-                        } else {
-                            // Add recent notifications to the list
-                            notificationModel.setUniqueKey(dataSnapshot.getKey());
-                            notificationModels.add(notificationModel);
-                        }
+                        notificationModel.setUniqueKey(dataSnapshot.getKey());
+                        notificationModels.add(notificationModel);
                     }
                 }
 
-                // Reverse the list to display most recent notifications first
                 List<NotificationModel> reversedList = new ArrayList<>();
                 for (int i = notificationModels.size() - 1; i >= 0; i--) {
                     reversedList.add(notificationModels.get(i));
@@ -252,17 +241,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private boolean isNotificationListenerEnabled() {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         return enabledListeners != null && enabledListeners.contains(getPackageName());
-    }
-
-    private void openAppSelectionActivity() {
-        // Functionality to open App Selection Activity
-        Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
-        intent.putExtra("isRevisiting", true);
-        startActivity(intent);
-        finish();
     }
 }

@@ -10,17 +10,17 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/_280sdp"
         android:layout_height="wrap_content"
-        android:text="Choose your Notification Apps"
         android:layout_marginTop="@dimen/_4sdp"
         android:fontFamily="serif"
-        android:textSize="@dimen/_28ssp"
-        android:textAlignment="center"
         android:letterSpacing=".01"
-        android:textStyle="bold"
+        android:textAlignment="center"
+        android:text="Choose your Notification Apps"
         android:textColor="@color/headingText"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="@dimen/_28ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/imageView2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,10 +45,6 @@
         android:textSize="@dimen/_20ssp"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,5 +52,17 @@
         android:background="@drawable/custom_button"
         android:elevation="5dp"
         android:translationZ="2dp" />
+
+    <ImageView
+        android:id="@+id/imageMenuActionBar"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:contentDescription="@string/app_name"
+        android:layout_marginEnd="@dimen/_11sdp"
+        android:background="@color/background"
+        app:layout_constraintBottom_toBottomOf="@+id/textView2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView2"
+        app:srcCompat="@drawable/menuvertical" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

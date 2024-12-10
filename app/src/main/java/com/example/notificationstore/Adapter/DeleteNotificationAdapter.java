@@ -67,7 +67,7 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
 
         holder.itemView.setOnLongClickListener(v -> {
             if (deleteListener != null) {
-                deleteListener.onRestoreNotification(model, position); // Trigger the restore callback
+                deleteListener.onNotificationLongPressed(model, position);
             }
             return true;
         });
@@ -105,5 +105,6 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
     public interface OnDeleteNotificationListener {
         void onDeleteNotification(DeleteNotificationModel model, int position);
         void onRestoreNotification(DeleteNotificationModel model, int position);
+        void onNotificationLongPressed(DeleteNotificationModel model, int position);
     }
 }
