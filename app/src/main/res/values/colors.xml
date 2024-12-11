@@ -13,7 +13,7 @@
     <color name="transparent">#00000000</color>
 
 
-    <color name="switch_thumb_off">#90A4AE</color> <!-- Slightly darker gray for thumb -->
+    <color name="switch_thumb_off">#D1D8DC</color> <!-- Slightly darker gray for thumb -->
     <color name="switch_track_off">#B0BEC5</color> <!-- Lighter gray for track -->
 
     <!-- ON State (Blue tones) -->

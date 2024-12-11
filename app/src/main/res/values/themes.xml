@@ -1,9 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.NotificationStore" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Customize your theme colors -->
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/background</item>
+
+        <!-- Set to true if you want dark icons for a light status bar, false otherwise -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
+    <!-- Default application theme -->
     <style name="Theme.NotificationStore" parent="Base.Theme.NotificationStore" />
 </resources>

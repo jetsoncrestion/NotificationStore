@@ -12,7 +12,7 @@
         android:id="@+id/notificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_6sdp"
         android:fontFamily="serif"
         android:letterSpacing=".01"
         android:text="Notification List"

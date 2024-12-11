@@ -1,7 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme for Night Mode -->
     <style name="Base.Theme.NotificationStore" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your dark theme here -->
+
+        <!-- Status bar color for Night Mode -->
+        <item name="android:statusBarColor">@color/background</item>
+
+        <!-- Use this to set light icons on a dark status bar -->
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

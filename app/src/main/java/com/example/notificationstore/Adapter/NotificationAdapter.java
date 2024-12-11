@@ -18,8 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationstore.Model.NotificationModel;
 import com.example.notificationstore.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -27,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
     private Context context;
@@ -90,46 +87,50 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             return;
         }
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-
         String uniqueKey = model.getUniqueKey();
-
-        Log.d("NotificationAdapter", "Attempting to delete notification with key: " + uniqueKey);
-
         if (uniqueKey == null) {
             Log.e("NotificationAdapter", "Unique key is null for notification at position: " + position);
             Toast.makeText(context, "Failed to find item in Firebase", Toast.LENGTH_SHORT).show();
             return;
         }
+        notificationModels.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, notificationModels.size());
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("notifications");
 
         DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
                 .getReference("devices")
                 .child(deviceId)
                 .child("deleted_notifications")
                 .child(uniqueKey);
-
         deletedNotificationsRef.setValue(model)
                 .addOnSuccessListener(aVoid -> {
-                    // Delete from "notifications" node after saving in "deleted_notifications"
+
                     databaseReference.child(uniqueKey).removeValue()
                             .addOnSuccessListener(aVoid1 -> {
-                                //notificationModels.remove(position);
-                                notifyItemRemoved(position);
-                                notifyItemRangeChanged(position, notificationModels.size());
                                 Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
                                 Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
                                 Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
                                 Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+
+                                notificationModels.add(position, model);
+                                notifyItemInserted(position);
+                                notifyItemRangeChanged(position, notificationModels.size());
                             });
                 })
                 .addOnFailureListener(e -> {
                     Log.e("NotificationAdapter", "Failed to save notification to deleted_notifications: " + e.getMessage());
                     Toast.makeText(context, "Failed to save deleted notification", Toast.LENGTH_SHORT).show();
+
+                    notificationModels.add(position, model);
+                    notifyItemInserted(position);
+                    notifyItemRangeChanged(position, notificationModels.size());
                 });
     }
 

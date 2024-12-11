@@ -39,7 +39,7 @@ public class AppSelectionActivity extends AppCompatActivity {
     private AppAdapter appAdapter;
     private List<AppModel> appModels;
     private Button confirmButton;
-    private ImageView imageMenuActionBar;
+    private ImageView imageMenuActionBar, imageViewBack;
     private RecyclerView recyclerView;
 
     @Override
@@ -47,6 +47,7 @@ public class AppSelectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_selection);
         imageMenuActionBar = findViewById(R.id.imageMenuActionBar);
+        imageViewBack = findViewById(R.id.imageViewBack);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -63,6 +64,12 @@ public class AppSelectionActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        imageViewBack.setOnClickListener(v -> {
+            Intent intent = new Intent(AppSelectionActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         confirmButton.setOnClickListener(v -> {
             List<String> selectedAppsList = appAdapter.getSelectedApps();
@@ -151,9 +158,14 @@ public class AppSelectionActivity extends AppCompatActivity {
         List<AppModel> apps = new ArrayList<>();
         PackageManager packageManager = getPackageManager();
         List<ApplicationInfo> installedApps = packageManager.getInstalledApplications(0);
+        String currentAppPackageName = getPackageName();
 
         for (ApplicationInfo appInfo : installedApps) {
             String appName = packageManager.getApplicationLabel(appInfo).toString();
+
+            if (appInfo.packageName.equals(currentAppPackageName)){
+                continue;
+            }
             if (packageManager.getLaunchIntentForPackage(appInfo.packageName) != null) {
 
                 Drawable appIcon = appInfo.loadIcon(packageManager);

@@ -3,7 +3,6 @@ package com.example.notificationstore;
 import android.graphics.Typeface;
 import android.text.style.TypefaceSpan;
 import android.graphics.Paint;
-import android.os.Build;
 
 public class CustomTypefaceSpan extends TypefaceSpan {
     private final Typeface typeface;

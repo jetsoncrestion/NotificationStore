@@ -14,14 +14,11 @@ public class DeviceUtil {
         String deviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
 
         if (deviceId == null) {
-            // Generate a new UUID
             deviceId = UUID.randomUUID().toString();
-            // Save it to SharedPreferences
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(DEVICE_ID_KEY, deviceId);
             editor.apply();
         }
-
         return deviceId;
     }
 }

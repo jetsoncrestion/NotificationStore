@@ -1,6 +1,5 @@
 package com.example.notificationstore;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -21,7 +20,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class MyNotificationListenerService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
@@ -53,16 +51,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
             Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
             return;
         }
-
-
-//        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-//        Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
-//        Log.d(TAG, "Selected apps from SharedPreferences: " + selectedApps);
-//
-//        if (!selectedApps.contains(packageName)) {
-//            Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
-//            return;
-//        }
 
         if (packageName.equals("com.android.systemui")) {
             Log.d(TAG, "Ignored notification from System UI.");

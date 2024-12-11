@@ -8,7 +8,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="@dimen/_285sdp"
-        android:layout_height="@dimen/_80sdp"
+        android:layout_height="@dimen/_75sdp"
         app:cardCornerRadius="@dimen/_16sdp"
         android:layout_marginBottom="@dimen/_8sdp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -43,7 +43,7 @@
                 android:ellipsize="end"
                 android:text="Facebook"
                 android:textColor="@color/special"
-                android:textSize="@dimen/_18ssp"
+                android:textSize="@dimen/_14ssp"
                 app:layout_constraintStart_toEndOf="@+id/appIcon"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal"
                 android:layout_marginStart="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_2sdp"
+                android:layout_marginTop="@dimen/_4sdp"
                 app:layout_constraintStart_toEndOf="@+id/appIcon"
                 app:layout_constraintTop_toBottomOf="@+id/appName">
 
@@ -64,7 +64,7 @@
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:fontFamily="@font/roboto"
-                    android:textSize="@dimen/_14ssp"
+                    android:textSize="@dimen/_12ssp"
                     android:singleLine="true"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
@@ -82,7 +82,7 @@
                 android:maxLines="1"
                 android:textColor="@color/special"
                 android:text="2024-12-1 9:40 PM"
-                android:textSize="@dimen/_12ssp"
+                android:textSize="@dimen/_10ssp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
