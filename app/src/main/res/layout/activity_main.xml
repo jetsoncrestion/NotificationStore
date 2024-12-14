@@ -8,84 +8,111 @@
     android:background="@color/background"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/notificationTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!-- Top Card with Title and Icons -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:backgroundTint="#1E88E5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/notificationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:fontFamily="serif"
+                android:text="Notification"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_20ssp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Search Icon -->
+            <ImageView
+                android:id="@+id/imageViewSearch"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:srcCompat="@drawable/search"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewFilter"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <!-- Filter Icon -->
+            <ImageView
+                android:id="@+id/imageViewFilter"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:srcCompat="@drawable/filter"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewSetting"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <!-- Settings Icon -->
+            <ImageView
+                android:id="@+id/imageViewSetting"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:srcCompat="@drawable/setting"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Search View -->
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/_6sdp"
-        android:fontFamily="serif"
-        android:letterSpacing=".01"
-        android:text="Notification List"
-        android:textAlignment="center"
-        android:textColor="@color/headingText"
-        android:textSize="@dimen/_26ssp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/imageMenuActionBar"
-        app:layout_constraintStart_toEndOf="@+id/imageBack"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/searchshape"
+        android:queryHint="Search for notifications"
+        android:iconifiedByDefault="false"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@+id/cardView2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Recycler View -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notificationRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        app:layout_constraintTop_toBottomOf="@+id/searchView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
-        android:id="@+id/noItemsTextView"
+        android:id="@+id/textViewNothingFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Sorry, nothing if found!"
-        android:textColor="@android:color/holo_red_dark"
-        android:textSize="@dimen/_18ssp"
+        android:fontFamily="@font/roboto"
+        android:text="There are no notification that match wtih your selected criteria"
+        android:textAlignment="center"
+        android:textColor="@color/special"
+        android:textSize="@dimen/_12ssp"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchView" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/notificationRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_6sdp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
-
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/_32sdp"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
-        android:background="@drawable/searchshape"
-        android:iconifiedByDefault="false"
-        android:queryBackground="@color/transparent"
-        android:queryHint="Search for notifications"
-        android:textColor="@android:color/white"
-        android:textColorHint="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/notificationTitle" />
-
-    <ImageView
-        android:id="@+id/imageMenuActionBar"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:background="@color/background"
-        android:contentDescription="@string/app_name"
-        app:layout_constraintBottom_toBottomOf="@+id/notificationTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/notificationTitle"
-        app:srcCompat="@drawable/menuvertical" />
-
-    <ImageView
-        android:id="@+id/imageBack"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        app:layout_constraintBottom_toBottomOf="@+id/notificationTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/notificationTitle"
-        app:srcCompat="@drawable/back" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,11 +7,12 @@
     android:background="@color/background">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="@dimen/_300sdp"
+        android:layout_width="@dimen/_285sdp"
         android:layout_height="@dimen/_45sdp"
         android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginBottom="@dimen/_2sdp"
-        app:cardCornerRadius="@dimen/_10sdp"
+        app:cardCornerRadius="@dimen/_6sdp"
+        android:backgroundTint="#F0F0F0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

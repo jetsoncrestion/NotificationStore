@@ -1,0 +1,151 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background"
+    android:padding="@dimen/_16sdp"
+    tools:context=".DeleteNotificationActivity">
+
+    <TextView
+        android:id="@+id/textViewFilterByApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Filter by Apps:"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:fontFamily="@font/roboto"
+        android:textSize="@dimen/_12ssp"
+        android:textColor="@color/special"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/toggleSwitch"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:thumbTint="@color/switch_thumb_off"
+        android:trackTint="@color/switch_track_off"
+        android:layout_marginEnd="@dimen/_18sdp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewFilterByApp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textViewFilterByApp"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <Spinner
+        android:id="@+id/spinner2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        app:layout_constraintStart_toStartOf="@+id/textViewFilterByApp"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFilterByApp" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:fontFamily="@font/roboto"
+        android:text="Filter by date: "
+        android:textColor="@color/special"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/spinner2"
+        app:layout_constraintTop_toBottomOf="@+id/spinner2" />
+
+    <Switch
+        android:id="@+id/toggleSwitchSecond"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:layout_marginEnd="@dimen/_18sdp"
+        android:thumbTint="@color/switch_thumb_off"
+        android:trackTint="@color/switch_track_off"
+        app:layout_constraintBottom_toBottomOf="@+id/textView5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView5"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <TextView
+        android:id="@+id/textViewFrom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="From:"
+        android:fontFamily="@font/roboto"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@color/paragraphHeadingText"
+        android:layout_marginTop="@dimen/_15ssp"
+        app:layout_constraintStart_toStartOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+    <TextView
+        android:id="@+id/textViewFromCalender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:layout_marginEnd="@dimen/_18sdp"
+        android:text=""
+        android:drawableEnd="@drawable/calendar"
+        android:drawablePadding="@dimen/_4sdp"
+        android:textColor="@color/paragraphHeadingText"
+        android:textSize="@dimen/_10ssp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewFrom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textViewFrom" />
+
+    <TextView
+        android:id="@+id/textViewUntil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Until:"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@color/paragraphHeadingText"
+        android:fontFamily="@font/roboto"
+        android:layout_marginTop="@dimen/_10sdp"
+        app:layout_constraintStart_toStartOf="@+id/textViewFrom"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFrom" />
+
+    <TextView
+        android:id="@+id/textViewUntilCalender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text=""
+        android:drawablePadding="@dimen/_4sdp"
+        android:drawableEnd="@drawable/calendar"
+        android:layout_marginEnd="@dimen/_18sdp"
+        android:textColor="@color/paragraphHeadingText"
+        android:textSize="@dimen/_10ssp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewUntil"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textViewUntil" />
+
+    <TextView
+        android:id="@+id/textViewAccept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="Accept"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:textColor="#1E88E5"
+        android:textSize="@dimen/_14ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewUntil" />
+
+    <TextView
+        android:id="@+id/textViewCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:textColor="#1E88E5"
+        android:textStyle="bold"
+        android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/roboto"
+        android:layout_marginEnd="@dimen/_18sdp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewAccept"
+        app:layout_constraintEnd_toStartOf="@+id/textViewAccept"
+        app:layout_constraintTop_toTopOf="@+id/textViewAccept" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,27 +1,29 @@
 package com.example.notificationstore;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.SearchView;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,56 +36,191 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final String PREFS_NAME = "NotificationStorePrefs";
     private static final String DEVICE_ID_KEY = "DeviceID";
 
+    private Context context;
+
     private NotificationAdapter notificationAdapter;
     private List<NotificationModel> notificationModels;
-    private TextView noItemsTextView;
-    private SearchView searchView;
-    private ImageView imageMenuActionBar, imageBack;
     private String deviceId;
+    TextView textViewNothingFound;
+    private ImageView imageViewSetting, imageViewSearch, imageViewFilter;
+    private SearchView imageSearch;
+    private int thumbOnColor, thumbOffColor, trackOnColor, trackOffColor;
+    private TextView textViewFromCalender, textViewUntilCalender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseApp.initializeApp(this);
+        textViewFromCalender = new TextView(this);
+        textViewUntilCalender = new TextView(this);
 
-        searchView = findViewById(R.id.searchView);
-        noItemsTextView = findViewById(R.id.noItemsTextView);
-        imageMenuActionBar = findViewById(R.id.imageMenuActionBar);
-        imageBack = findViewById(R.id.imageBack);
+        FirebaseApp.initializeApp(this);
+        imageViewSetting = findViewById(R.id.imageViewSetting);
+        imageSearch = findViewById(R.id.searchView);
+        imageViewSearch = findViewById(R.id.imageViewSearch);
+        textViewNothingFound = findViewById(R.id.textViewNothingFound);
+        imageViewFilter = findViewById(R.id.imageViewFilter);
+
+        imageViewSetting.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, Setting.class);
+            startActivity(intent);
+        });
+
+        imageViewSearch.setOnClickListener(v -> {
+            toggleSearchView(imageSearch.getVisibility() != View.VISIBLE);
+        });
+
+
+        imageViewFilter.setOnClickListener(v -> {
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View dialogView = inflater.inflate(R.layout.custom_filter_alert_dialog, null);
+
+            TextView textViewCancel = dialogView.findViewById(R.id.textViewCancel);
+            TextView textViewAccept = dialogView.findViewById(R.id.textViewAccept);
+            Switch toggleSwitch = dialogView.findViewById(R.id.toggleSwitch);
+            Switch toggleSwitchSecond = dialogView.findViewById(R.id.toggleSwitchSecond);
+            Spinner appSpinner = dialogView.findViewById(R.id.spinner2);
+            TextView textViewFrom = dialogView.findViewById(R.id.textViewFrom);
+            TextView textViewUntil = dialogView.findViewById(R.id.textViewUntil);
+            TextView textViewFromCalender = dialogView.findViewById(R.id.textViewFromCalender);
+            TextView textViewUntilCalender = dialogView.findViewById(R.id.textViewUntilCalender);
+
+            thumbOnColor = ContextCompat.getColor(this, R.color.switch_thumb_on);
+            thumbOffColor = ContextCompat.getColor(this, R.color.switch_thumb_off);
+            trackOnColor = ContextCompat.getColor(this, R.color.switch_track_on);
+            trackOffColor = ContextCompat.getColor(this, R.color.switch_track_off);
+
+            appSpinner.setVisibility(View.GONE);
+            textViewFrom.setVisibility(View.GONE);
+            textViewUntil.setVisibility(View.GONE);
+            textViewFromCalender.setVisibility(View.GONE);
+            textViewUntilCalender.setVisibility(View.GONE);
+
+            List<String> appNames = new ArrayList<>();
+            appNames.add("All Apps");
+
+            for (NotificationModel model : notificationModels) {
+                if (model != null && model.getAppName() != null && !appNames.contains(model.getAppName())) {
+                    appNames.add(model.getAppName());
+                }
+            }
+
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appNames);
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            appSpinner.setAdapter(spinnerAdapter);
+
+            Log.d(TAG, "App Names: " + appNames);
+
+            appSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    String selectedApp = appSpinner.getSelectedItem().toString();
+                    Log.d(TAG, "Selected app: " + selectedApp);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+
+                }
+            });
+
+            toggleSwitch.setOnCheckedChangeListener(((buttonView, isChecked) -> {
+                updateSwitchColors(toggleSwitch, isChecked);
+                if (isChecked){
+                    appSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    appSpinner.setVisibility(View.GONE);
+                }
+            }));
+
+            toggleSwitchSecond.setOnCheckedChangeListener(((buttonView, isChecked) -> {
+                updateSwitchSecondColors(toggleSwitchSecond, isChecked);
+                if (isChecked){
+                    textViewFrom.setVisibility(View.VISIBLE);
+                    textViewFromCalender.setVisibility(View.VISIBLE);
+                    textViewUntil.setVisibility(View.VISIBLE);
+                    textViewUntilCalender.setVisibility(View.VISIBLE);
+                } else {
+                    textViewFrom.setVisibility(View.GONE);
+                    textViewFromCalender.setVisibility(View.GONE);
+                    textViewUntil.setVisibility(View.GONE);
+                    textViewUntilCalender.setVisibility(View.GONE);
+                }
+            }));
+
+            appSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    String selectedApp = appSpinner.getSelectedItem().toString();
+                    Log.d(TAG, "Selected app: " + selectedApp);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                }
+            });
+
+
+            ArrayAdapter<String> spinnerAdapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appNames);
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            appSpinner.setAdapter(spinnerAdapter);
+
+            textViewFromCalender.setOnClickListener(v1 -> showDatePicker(textViewFromCalender));
+            textViewUntilCalender.setOnClickListener(v1 -> showDatePicker(textViewUntilCalender));
+
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create();
+
+            textViewCancel.setOnClickListener(v1 -> alertDialog.dismiss());
+
+            textViewAccept.setOnClickListener(v1 -> {
+                String selectedApp = appSpinner.getSelectedItem().toString();
+                String startDate = textViewFromCalender.getText().toString();
+                String endDate = textViewUntilCalender.getText().toString();
+
+                Log.d(TAG, "Filter accepted: App - " + selectedApp + ", Start Date - " + startDate + ", End Date - " + endDate);
+
+                filterNotificationsByAppAndDate(selectedApp, startDate, endDate);
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
+        });
+
 
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        imageSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                filterNotifications(query);
+                String startDate = textViewFromCalender.getText().toString();
+                String endDate = textViewUntilCalender.getText().toString();
+                filterNotifications(query, startDate, endDate);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterNotifications(newText);
+                String startDate = textViewFromCalender.getText().toString();
+                String endDate = textViewUntilCalender.getText().toString();
+                filterNotifications(newText, startDate, endDate);
                 return false;
             }
         });
 
-        imageMenuActionBar.setOnClickListener(v -> {
-            showPopupMenu(v);
-        });
-
-        imageBack.setOnClickListener(v -> {
-            finish();
-        });
 
         if (!isNotificationListenerEnabled()) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
@@ -99,49 +236,94 @@ public class MainActivity extends AppCompatActivity {
         loadNotificationsFromFirebase();
     }
 
-    private void showPopupMenu(View view) {
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        MenuInflater inflater = popupMenu.getMenuInflater();
-        inflater.inflate(R.menu.main_menu, popupMenu.getMenu());
-
-        MenuItem actionUpdateSelection = popupMenu.getMenu().findItem(R.id.action_update_selection);
-        MenuItem actionViewDeleted = popupMenu.getMenu().findItem(R.id.action_view_deleted);
-
-        // Apply custom styling
-        applyPopupMenuItemStyle(actionUpdateSelection);
-        applyPopupMenuItemStyle(actionViewDeleted);
-
-        // Handle menu item clicks
-        popupMenu.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_update_selection) {
-                Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
-                intent.putExtra("isRevisiting", true);
-                startActivity(intent);
-                finish();
-            } else if (item.getItemId() == R.id.action_view_deleted) {
-                Intent intent = new Intent(MainActivity.this, DeleteNotificationActivity.class);
-                startActivity(intent);
-                return true;
-            }
-            return false;
-        });
-
-        popupMenu.show();
+    private void updateSwitchColors(Switch toggleSwitch, boolean isChecked) {
+        if (isChecked) {
+            toggleSwitch.setThumbTintList(ColorStateList.valueOf(thumbOnColor));
+            toggleSwitch.setTrackTintList(ColorStateList.valueOf(trackOnColor));
+        } else {
+            toggleSwitch.setThumbTintList(ColorStateList.valueOf(thumbOffColor));
+            toggleSwitch.setTrackTintList(ColorStateList.valueOf(trackOffColor));
+        }
     }
 
-    private void applyPopupMenuItemStyle(MenuItem item) {
-        SpannableString styledText = new SpannableString(item.getTitle());
+    private void updateSwitchSecondColors(Switch toggleSwitchSecond, boolean isChecked) {
+        if (isChecked) {
+            toggleSwitchSecond.setThumbTintList(ColorStateList.valueOf(thumbOnColor));
+            toggleSwitchSecond.setTrackTintList(ColorStateList.valueOf(trackOnColor));
+        } else {
+            toggleSwitchSecond.setThumbTintList(ColorStateList.valueOf(thumbOffColor));
+            toggleSwitchSecond.setTrackTintList(ColorStateList.valueOf(trackOffColor));
+        }
+    }
 
-        int textColor = getResources().getColor(R.color.headingText);
-        int textSize = 20;  // In sp (scaled pixels)
-        Typeface typeface = ResourcesCompat.getFont(this, R.font.roboto);
+    private void filterNotificationsByAppAndDate(String selectedApp, String startDate, String endDate) {
+        Log.d(TAG, "filterNotificationsByAppAndDate called with app: " + selectedApp + ", startDate: " + startDate + ", endDate: " + endDate);
+        List<NotificationModel> filteredList = new ArrayList<>();
+        long start = Long.MIN_VALUE;
+        long end = Long.MAX_VALUE;
 
-        styledText.setSpan(new ForegroundColorSpan(textColor), 0, styledText.length(), 0);
-        styledText.setSpan(new StyleSpan(Typeface.BOLD), 0, styledText.length(), 0);
-        styledText.setSpan(new AbsoluteSizeSpan(textSize, true), 0, styledText.length(), 0);
-        //styledText.setSpan(new CustomTypefaceSpan(R.font.roboto, typeface), 0, styledText.length(), 0);
+        // Parse start and end dates
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            if (!TextUtils.isEmpty(startDate)) {
+                Calendar startCalendar = Calendar.getInstance();
+                startCalendar.setTime(dateFormat.parse(startDate));
+                startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+                startCalendar.set(Calendar.MINUTE, 0);
+                startCalendar.set(Calendar.SECOND, 0);
+                startCalendar.set(Calendar.MILLISECOND, 0);
+                start = startCalendar.getTimeInMillis();
+            }
+            if (!TextUtils.isEmpty(endDate)) {
+                Calendar endCalendar = Calendar.getInstance();
+                endCalendar.setTime(dateFormat.parse(endDate));
+                endCalendar.set(Calendar.HOUR_OF_DAY, 23);
+                endCalendar.set(Calendar.MINUTE, 59);
+                endCalendar.set(Calendar.SECOND, 59);
+                endCalendar.set(Calendar.MILLISECOND, 999);
+                end = endCalendar.getTimeInMillis();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing dates: " + e.getMessage());
+        }
 
-        item.setTitle(styledText);
+        // Filter notifications
+        for (NotificationModel model : notificationModels) {
+            if (model != null) {
+                boolean matchesApp = "All Apps".equals(selectedApp) ||
+                        (model.getAppName() != null && model.getAppName().equalsIgnoreCase(selectedApp));
+
+                Log.d("Date Filter", "Notification timestamp: " + model.getTimeStamp() + ", Start date: " + startDate + ", End date: " + endDate);
+
+                // Ensure that the timestamp is within the range
+                boolean matchesDate = model.getTimeStamp() >= start && model.getTimeStamp() <= end;
+
+                if (matchesApp && matchesDate) {
+                    filteredList.add(model);
+                }
+            }
+        }
+        Log.d(TAG, "Filtered notifications count: " + filteredList.size());
+        // Update RecyclerView
+        notificationAdapter.updateData(filteredList);
+
+    }
+
+    private void toggleSearchView(boolean show) {
+        if (show) {
+            imageSearch.setVisibility(View.VISIBLE);
+            imageSearch.setAlpha(0f); // Start with invisible
+            imageSearch.animate()
+                    .alpha(1f) // Fade in
+                    .setDuration(300)
+                    .start();
+        } else {
+            imageSearch.animate()
+                    .alpha(0f) // Fade out
+                    .setDuration(300)
+                    .withEndAction(() -> imageSearch.setVisibility(View.GONE)) // Hide after fade out
+                    .start();
+        }
     }
 
     @Override
@@ -152,43 +334,62 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Handle action bar item clicks here.
         if (item.getItemId() == R.id.action_update_selection) {
-            // Directly apply the intent inside the if block
             Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
             intent.putExtra("isRevisiting", true);
             startActivity(intent);
-            finish(); // Finish MainActivity to prevent the user from going back
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-    private void filterNotifications(String newText) {
+    private void filterNotifications(String query, String startDate, String endDate) {
         List<NotificationModel> filteredList = new ArrayList<>();
+        long start = Long.MIN_VALUE;
+        long end = Long.MAX_VALUE;
 
-        if (!TextUtils.isEmpty(newText)) {
-            for (NotificationModel model : notificationModels) {
-                if (model != null &&
-                        model.getAppName() != null &&
-                        model.getNotificationContent() != null &&
-                        (model.getAppName().toLowerCase().contains(newText.toLowerCase()) ||
-                                model.getNotificationContent().toLowerCase().contains(newText.toLowerCase()))) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        try {
+            if (!TextUtils.isEmpty(startDate)) {
+                start = dateFormat.parse(startDate).getTime();
+            }
+            if (!TextUtils.isEmpty(endDate)) {
+                end = dateFormat.parse(endDate).getTime();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing dates: " + e.getMessage());
+        }
+
+        for (NotificationModel model : notificationModels) {
+            if (model != null) {
+                boolean matchesQuery = TextUtils.isEmpty(query) ||
+                        (model.getAppName() != null && model.getAppName().toLowerCase().contains(query.toLowerCase())) ||
+                        (model.getNotificationContent() != null && model.getNotificationContent().toLowerCase().contains(query.toLowerCase())) ||
+                        (model.getNotificationHeading() != null && model.getNotificationHeading().toLowerCase().contains(query.toLowerCase()));
+
+                boolean matchesDate = model.getTimeStamp() >= start && model.getTimeStamp() <= end;
+
+                if (matchesQuery && matchesDate) {
                     filteredList.add(model);
                 }
             }
-        } else {
-            filteredList.addAll(notificationModels);
-        }
-
-        if (filteredList.isEmpty()) {
-            findViewById(R.id.noItemsTextView).setVisibility(View.VISIBLE); // Show the message
-        } else {
-            findViewById(R.id.noItemsTextView).setVisibility(View.GONE); // Hide the message
         }
 
         notificationAdapter.updateData(filteredList);
+
+        // Show or hide the "Nothing Found" message directly in the listener
+        if (filteredList.isEmpty()) {
+            textViewNothingFound.setVisibility(View.VISIBLE);  // Show "Nothing Found" message
+        } else {
+            textViewNothingFound.setVisibility(View.GONE);  // Hide "Nothing Found" message
+        }
+
+
+        //notificationAdapter.updateData(filteredList);
+        Log.d(TAG, "Filtered notifications count: " + filteredList.size());
     }
 
     private void loadNotificationsFromFirebase() {
@@ -197,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
                 .child(deviceId)
                 .child("notifications");
 
-        databaseReference.orderByChild("timestamp").limitToLast(50).addValueEventListener(new ValueEventListener() {
+        databaseReference.orderByChild("timestamp").limitToLast(100).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 notificationModels.clear();
@@ -237,5 +438,20 @@ public class MainActivity extends AppCompatActivity {
     private boolean isNotificationListenerEnabled() {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         return enabledListeners != null && enabledListeners.contains(getPackageName());
+    }
+
+    private void showDatePicker(TextView textView) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year1, month1, dayOfMonth) -> {
+                    String date = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, month1 + 1, dayOfMonth);
+                    textView.setText(date);
+                    Log.d(TAG, "Date selected: " + date);
+                }, year, month, day);
+        datePickerDialog.show();
     }
 }

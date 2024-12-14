@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -32,16 +33,42 @@ public class MyNotificationListenerService extends NotificationListenerService {
         String packageName = sbn.getPackageName();
         String title = sbn.getNotification().extras.getString("android.title");
         String text = sbn.getNotification().extras.getString("android.text");
+        String heading = title;
         long timestamp = sbn.getPostTime();
 
-        Log.d(TAG, "Notification received: " + packageName + " - " + title + " - " + text);
+        Log.d(TAG, "Notification received: " + packageName + " - " + heading + " - " + text);
 
-        if (title == null || text == null) {
-            Log.e(TAG, "Title or text is null, skipping notification.");
+        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(text)) {
+            Log.e(TAG, "Title or text is null/empty, skipping notification.");
             return;
         }
 
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean showAllNotifications = preferences.getBoolean("hideSystemNotifications", false);
+        boolean allowDuplicates = preferences.getBoolean("hideDuplicateNotifications", false);
+
+        if (!showAllNotifications) {
+            Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
+            if (!selectedApps.contains(packageName)) {
+                Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
+                return;
+            }
+        }
+
+        String currentNotificationKey = packageName + "|" + title + "|" + text;
+        if (!allowDuplicates) {
+            if (currentNotificationKey.equals(lastNotificationKey)) {
+                Log.d(TAG, "Duplicate notification detected, skipping.");
+                return;
+            }
+
+            if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
+                Log.d(TAG, "Notification received too soon after the last one, skipping.");
+                return;
+            }
+        }
+
+
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
 
         // Log the selected apps to verify
@@ -52,18 +79,15 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
-        if (packageName.equals("com.android.systemui")) {
-            Log.d(TAG, "Ignored notification from System UI.");
-            return;
-        }
+//        if (packageName.equals("com.android.systemui")) {
+//            Log.d(TAG, "Ignored notification from System UI.");
+//            return;
+//        }
 
-        // Deduplication logic
-        String currentNotificationKey = packageName + "|" + title + "|" + text;
-
-        if (currentNotificationKey.equals(lastNotificationKey)) {
-            Log.d(TAG, "Duplicate notification detected, skipping.");
-            return;
-        }
+//        if (currentNotificationKey.equals(lastNotificationKey)) {
+//            Log.d(TAG, "Duplicate notification detected, skipping.");
+//            return;
+//        }
 
         if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
             Log.d(TAG, "Notification received too soon after the last one, skipping.");
@@ -86,10 +110,10 @@ public class MyNotificationListenerService extends NotificationListenerService {
             appName = packageName;
         }
 
-        saveNotificationToFirebase(appName, text, timestamp, appIconBase64);
+        saveNotificationToFirebase(appName, heading, text, timestamp, appIconBase64);
     }
 
-    private void saveNotificationToFirebase(String appName, String text, long timestamp, String appIconBase64) {
+    private void saveNotificationToFirebase(String appName, String heading, String text, long timestamp, String appIconBase64) {
         // Retrieve device ID
         String deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
@@ -97,12 +121,12 @@ public class MyNotificationListenerService extends NotificationListenerService {
                 .getReference("devices")
                 .child(deviceId)
                 .child("notifications");
-
-        String notificationId = String.valueOf(timestamp);  // Use timestamp as the unique key
+        String notificationId = String.valueOf(timestamp);
 
         NotificationModel notification = new NotificationModel();
         notification.setUniqueKey(notificationId);
         notification.setAppName(appName);
+        notification.setNotificationHeading(heading);
         notification.setNotificationContent(text);
         notification.setNotificationDateTime(timestamp);
         notification.setAppIconBase64(appIconBase64);

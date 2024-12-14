@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -59,23 +60,34 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
             holder.appIcon.setImageResource(R.drawable.baseline_android_24);
         }
 
-        holder.imageButtonDelete.setOnClickListener(v -> {
+        holder.imageButtonMenuActionBar.setOnClickListener(v -> {
             if (deleteListener != null) {
-                deleteListener.onDeleteNotification(model, position);
-            }
-        });
+                PopupMenu popupMenu = new PopupMenu(context, v);
+                popupMenu.inflate(R.menu.second_menu);
 
-        holder.itemView.setOnLongClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onNotificationLongPressed(model, position);
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == R.id.action_Delete_selection) {
+                        deleteListener.onDeleteNotification(model, position);
+                        return true;
+                    } else if (item.getItemId() == R.id.action_restore_selection) {
+                        deleteListener.onRestoreNotification(model, position);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                popupMenu.show();
             }
-            return true;
         });
     }
 
     @Override
     public int getItemCount() {
         return deleteNotificationModels.size();
+    }
+
+    public DeleteNotificationModel getNotificationAt(int position) {
+        return deleteNotificationModels.get(position);
     }
 
     private Bitmap decodeBase64ToBitmap(String base64String) {
@@ -90,7 +102,7 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView appName, notificationContent, notificationDateTime;
-        private final ImageView appIcon, imageButtonDelete;
+        private final ImageView appIcon, imageButtonMenuActionBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,13 +110,14 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
             notificationContent = itemView.findViewById(R.id.notificationContent);
             notificationDateTime = itemView.findViewById(R.id.notificationDateTime);
             appIcon = itemView.findViewById(R.id.appIcon);
-            imageButtonDelete = itemView.findViewById(R.id.imageButtonDelete);
+
+            imageButtonMenuActionBar = itemView.findViewById(R.id.imageButtonMenuActionBar);
+            imageButtonMenuActionBar.setClickable(true);
         }
     }
 
     public interface OnDeleteNotificationListener {
         void onDeleteNotification(DeleteNotificationModel model, int position);
         void onRestoreNotification(DeleteNotificationModel model, int position);
-        void onNotificationLongPressed(DeleteNotificationModel model, int position);
     }
 }

@@ -4,6 +4,7 @@ public class NotificationModel {
     private String uniqueKey;
     private String appName;
     private long timeStamp;
+    private String notificationHeading;
     private String notificationContent;
     private long notificationDateTime;
     private String appIconBase64;
@@ -11,13 +12,15 @@ public class NotificationModel {
 
     // Default constructor
     public NotificationModel() {
+        this.timeStamp = System.currentTimeMillis();
     }
 
     // Constructor with parameters
-    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
+    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
         this.uniqueKey = uniqueKey;
         this.appName = appName;
-        this.timeStamp = timeStamp;
+        this.timeStamp = timeStamp == 0 ? System.currentTimeMillis() : timeStamp;
+        this.notificationHeading = notificationHeading;
         this.notificationContent = notificationContent;
         this.notificationDateTime = notificationDateTime;
         this.appIconBase64 = appIconBase64;
@@ -45,6 +48,14 @@ public class NotificationModel {
     }
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public void setNotificationHeading(String notificationHeading){
+        this.notificationHeading = notificationHeading;
+    }
+
+    public String getNotificationHeading(){
+        return notificationHeading;
     }
 
     public String getNotificationContent() {

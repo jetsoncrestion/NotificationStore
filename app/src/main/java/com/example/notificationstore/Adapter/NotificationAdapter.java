@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationstore.Model.NotificationModel;
@@ -45,11 +46,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @Override
     public void onBindViewHolder(@NonNull NotificationAdapter.NotificationViewHolder holder, int position) {
         NotificationModel notificationModel = notificationModels.get(position);
+        holder.notificationHeading.setText(notificationModel.getNotificationHeading());
         holder.appName.setText(notificationModel.getAppName());
         holder.notificationContent.setText(notificationModel.getNotificationContent());
 
         long timestamp = notificationModel.getNotificationDateTime();
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(timestamp));
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
         holder.notificationDateTime.setText(formattedDate);
 
         String appIconBase64 = notificationModel.getAppIconBase64();
@@ -68,6 +70,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         holder.imageButtonDelete.setOnClickListener(v -> {
             deleteNotification(position);
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            showNotificationDetailsDialog(notificationModel);
         });
     }
 
@@ -95,7 +101,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
         notificationModels.remove(position);
         notifyItemRemoved(position);
-        notifyItemRangeChanged(position, notificationModels.size());
+//        notifyItemRangeChanged(position, notificationModels.size());
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference("devices")
@@ -113,7 +119,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     databaseReference.child(uniqueKey).removeValue()
                             .addOnSuccessListener(aVoid1 -> {
                                 Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
-                                Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
+                               // Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
                                 Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
@@ -121,7 +127,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
                                 notificationModels.add(position, model);
                                 notifyItemInserted(position);
-                                notifyItemRangeChanged(position, notificationModels.size());
+//                                notifyItemRangeChanged(position, notificationModels.size());
                             });
                 })
                 .addOnFailureListener(e -> {
@@ -144,17 +150,40 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return notificationModels.size();
     }
 
+    private void showNotificationDetailsDialog(NotificationModel model) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.notification_item, null);
+
+        TextView appName = dialogView.findViewById(R.id.textViewAppName);
+        TextView notificationHeading = dialogView.findViewById(R.id.textViewNotificationHeading);
+        TextView notificationContent = dialogView.findViewById(R.id.textViewNotificationContent);
+        TextView close = dialogView.findViewById(R.id.textViewClose);
+
+        appName.setText(model.getAppName());
+        notificationHeading.setText(model.getNotificationHeading());
+        notificationContent.setText(model.getNotificationContent());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog dialog = builder.setView(dialogView)
+                .create();
+
+        dialog.show();
+
+        close.setOnClickListener(v -> dialog.dismiss());
+    }
+
     public static class NotificationViewHolder extends RecyclerView.ViewHolder {
-        private TextView appName, notificationContent, notificationDateTime;
+        private TextView appName, notificationHeading, notificationContent, notificationDateTime;
         private ImageView appIcon, imageButtonDelete;
 
         public NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
             appName = itemView.findViewById(R.id.appName);
+            notificationHeading = itemView.findViewById(R.id.notificationHeading);
             notificationContent = itemView.findViewById(R.id.notificationContent);
             notificationDateTime = itemView.findViewById(R.id.notificationDateTime);
             appIcon = itemView.findViewById(R.id.appIcon);
             imageButtonDelete = itemView.findViewById(R.id.imageButtonDelete);
+            //imageViewMenuActionBar = itemView.findViewById(R.id.imageViewMenuActionBar);
         }
     }
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background">
+
+    <TextView
+        android:id="@+id/textViewAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:fontFamily="@font/roboto"
+        android:text="sss"
+        android:textColor="@color/special"
+        android:textSize="@dimen/_14ssp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewNotificationHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:fontFamily="@font/roboto"
+        android:text="sss"
+        android:textStyle="bold"
+        android:textColor="@color/special"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewAppName"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAppName" />
+
+    <TextView
+        android:id="@+id/textViewNotificationContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:text="sss"
+        android:fontFamily="@font/roboto"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:textColor="@color/paragraphHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewNotificationHeading"
+        app:layout_constraintTop_toBottomOf="@+id/textViewNotificationHeading" />
+
+    <TextView
+        android:id="@+id/textViewClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_14ssp"
+        android:fontFamily="@font/roboto"
+        android:text="Close"
+        android:textColor="#1E88E5"
+        android:textSize="@dimen/_14sdp"
+        android:textStyle="bold"
+        android:layout_marginBottom="@dimen/_6sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewNotificationContent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
