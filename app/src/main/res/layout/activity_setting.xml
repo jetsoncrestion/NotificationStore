@@ -227,7 +227,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/textViewChooseApplication"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textViewChooseApplicationForShowingNotification"
-                app:srcCompat="@drawable/greaterthan_svgrepo_com" />
+                app:srcCompat="@drawable/greaterthan_circle" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

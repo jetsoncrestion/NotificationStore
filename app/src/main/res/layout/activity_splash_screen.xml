@@ -10,14 +10,15 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="@dimen/_320sdp"
         android:contentDescription="logo"
+        android:layout_marginEnd="@dimen/_26sdp"
         android:layout_marginTop="@dimen/_90sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo" />
+        app:srcCompat="@drawable/logo_" />
 
     <TextView
         android:id="@+id/textView"

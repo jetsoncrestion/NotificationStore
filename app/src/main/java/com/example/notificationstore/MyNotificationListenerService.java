@@ -79,15 +79,15 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
-//        if (packageName.equals("com.android.systemui")) {
-//            Log.d(TAG, "Ignored notification from System UI.");
-//            return;
-//        }
+        if (packageName.equals("com.android.systemui")) {
+            Log.d(TAG, "Ignored notification from System UI.");
+            return;
+        }
 
-//        if (currentNotificationKey.equals(lastNotificationKey)) {
-//            Log.d(TAG, "Duplicate notification detected, skipping.");
-//            return;
-//        }
+        if (currentNotificationKey.equals(lastNotificationKey)) {
+            Log.d(TAG, "Duplicate notification detected, skipping.");
+            return;
+        }
 
         if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
             Log.d(TAG, "Notification received too soon after the last one, skipping.");
