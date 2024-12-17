@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:interpolator/decelerate_quad">
+    android:fillAfter="true"
+    android:interpolator="@android:interpolator/accelerate_decelerate">
+
+    <!-- Animation for ImageView -->
     <alpha
-        android:duration="1500"
+        android:duration="3000"
         android:fromAlpha="0.0"
+        android:startOffset="500"
         android:toAlpha="1.0" />
+
     <scale
-        android:duration="1500"
+        android:duration="3000"
         android:fromXScale="0.5"
         android:fromYScale="0.5"
-        android:toXScale="1.0"
-        android:toYScale="1.0"
         android:pivotX="50%"
-        android:pivotY="50%" />
+        android:pivotY="50%"
+        android:startOffset="500"
+        android:toXScale="1.0"
+        android:toYScale="1.0" />
+
+    <!-- Animation for TextView -->
+    <alpha
+        android:duration="3000"
+        android:fromAlpha="0.0"
+        android:startOffset="1000"
+        android:toAlpha="1.0" />
+
+    <scale
+        android:duration="3000"
+        android:fromXScale="0.5"
+        android:fromYScale="0.5"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:startOffset="1000"
+        android:toXScale="1.0"
+        android:toYScale="1.0" />
 </set>
+
+<!--    2024-12-16 13:16:37.439  9951-9951  SelectedApps            com.example.notificationstore        D  Selected apps: [com.google.android.youtube, com.whatsapp, com.sec.android.app.clockpackage, com.facebook.katana, com.facebook.orca, com.linkedin.android, com.everywear.game5]-->

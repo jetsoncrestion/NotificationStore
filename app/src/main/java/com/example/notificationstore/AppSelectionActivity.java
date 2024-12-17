@@ -5,9 +5,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,8 +23,6 @@ import com.example.notificationstore.Model.AppModel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AppSelectionActivity extends AppCompatActivity {
     private AppAdapter appAdapter;
@@ -33,8 +30,6 @@ public class AppSelectionActivity extends AppCompatActivity {
     private ImageView imageViewBack;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private ExecutorService executorService;
-    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +40,8 @@ public class AppSelectionActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        executorService = Executors.newSingleThreadExecutor();
 
-        preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isAppSelectionDone = preferences.getBoolean("isAppSelectionDone", false);
         boolean isRevisiting = getIntent().getBooleanExtra("isRevisiting", false);
 
@@ -67,20 +60,14 @@ public class AppSelectionActivity extends AppCompatActivity {
 
         findViewById(R.id.button).setOnClickListener(v -> {
             List<String> selectedAppsList = appAdapter.getSelectedApps();
+            Log.d("SelectedApps", "Selected apps: " + selectedAppsList);
+
             if (selectedAppsList.isEmpty()) {
                 Toast.makeText(AppSelectionActivity.this, "Please select at least one app.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putStringSet("selectedApps", new HashSet<>(selectedAppsList));
-            editor.putBoolean("isAppSelectionDone", true);
-            editor.apply();
-
-            Intent intent = new Intent(AppSelectionActivity.this, MainActivity.class);
-            intent.putStringArrayListExtra("selectedApps", new ArrayList<>(selectedAppsList));
-            startActivity(intent);
-            finish();
+            new SavePreferencesTask(preferences, selectedAppsList).execute();
         });
 
         loadApps();
@@ -88,69 +75,7 @@ public class AppSelectionActivity extends AppCompatActivity {
 
     private void loadApps() {
         progressBar.setVisibility(View.VISIBLE);
-
-        // Check if the installed apps are cached in SharedPreferences
-        String cachedApps = preferences.getString("cachedApps", null);
-        if (cachedApps != null) {
-            // Parse cached data and load it directly
-            List<AppModel> cachedAppModels = parseCachedApps(cachedApps);
-            updateRecyclerView(cachedAppModels);
-        } else {
-            // If no cached data, load the apps from scratch
-            executorService.submit(() -> {
-                List<AppModel> apps = getInstalledApps();
-                // Cache the loaded apps
-                cacheInstalledApps(apps);
-                // Update the UI on the main thread
-                new Handler(Looper.getMainLooper()).post(() -> updateRecyclerView(apps));
-            });
-        }
-    }
-
-    private void updateRecyclerView(List<AppModel> apps) {
-        progressBar.setVisibility(View.GONE);
-        appModels = apps;
-
-        HashSet<String> selectedApps = (HashSet<String>) preferences.getStringSet("selectedApps", new HashSet<>());
-        for (AppModel appModel : appModels) {
-            if (selectedApps.contains(appModel.getPackageName())) {
-                appModel.setSelected(true);
-            }
-        }
-
-        appAdapter = new AppAdapter(appModels, AppSelectionActivity.this);
-        recyclerView.setAdapter(appAdapter);
-    }
-
-    private void cacheInstalledApps(List<AppModel> apps) {
-        StringBuilder appsStringBuilder = new StringBuilder();
-        for (AppModel appModel : apps) {
-            appsStringBuilder.append(appModel.getPackageName()).append(",");
-        }
-        preferences.edit().putString("cachedApps", appsStringBuilder.toString()).apply();
-    }
-
-    private List<AppModel> parseCachedApps(String cachedApps) {
-        List<AppModel> apps = new ArrayList<>();
-        String[] appPackages = cachedApps.split(",");
-        PackageManager packageManager = getPackageManager();
-
-        for (String appPackage : appPackages) {
-            try {
-                // Get application info for the package name
-                ApplicationInfo appInfo = packageManager.getApplicationInfo(appPackage, 0);
-                String appName = packageManager.getApplicationLabel(appInfo).toString();
-                Drawable appIcon = appInfo.loadIcon(packageManager);  // Get the app's icon
-
-                // Create the AppModel with real app name and icon
-                apps.add(new AppModel(appName, appPackage, false, appIcon));
-            } catch (PackageManager.NameNotFoundException e) {
-                // Handle case where the app package is not found
-                Log.e("AppSelection", "Package not found: " + appPackage);
-            }
-        }
-
-        return apps;
+        new LoadAppsTask().execute();
     }
 
     private List<AppModel> getInstalledApps() {
@@ -162,22 +87,79 @@ public class AppSelectionActivity extends AppCompatActivity {
         for (ApplicationInfo appInfo : installedApps) {
             String appName = packageManager.getApplicationLabel(appInfo).toString();
 
-            // Filter out the current app and apps that don't have launch intents
-            if (appInfo.packageName.equals(currentAppPackageName)) continue;
-            if (packageManager.getLaunchIntentForPackage(appInfo.packageName) == null) continue;
-
-            Drawable appIcon = appInfo.loadIcon(packageManager);
-            apps.add(new AppModel(appName, appInfo.packageName, false, appIcon));
+            if (appInfo.packageName.equals(currentAppPackageName)) {
+                continue;
+            }
+            if (packageManager.getLaunchIntentForPackage(appInfo.packageName) != null) {
+                Drawable appIcon = appInfo.loadIcon(packageManager);
+                apps.add(new AppModel(appName, appInfo.packageName, false, appIcon));
+            }
         }
         return apps;
     }
 
+    private class LoadAppsTask extends AsyncTask<Void, Void, List<AppModel>> {
+        @Override
+        protected List<AppModel> doInBackground(Void... voids) {
+            return getInstalledApps();
+        }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdown();
+        @Override
+        protected void onPostExecute(List<AppModel> apps) {
+            super.onPostExecute(apps);
+            progressBar.setVisibility(View.GONE);
+            appModels = apps;
+
+            new LoadSelectedAppsTask().execute();
+        }
+    }
+
+    private class LoadSelectedAppsTask extends AsyncTask<Void, Void, HashSet<String>> {
+        @Override
+        protected HashSet<String> doInBackground(Void... voids) {
+            SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            return (HashSet<String>) preferences.getStringSet("selectedApps", new HashSet<>());
+        }
+
+        @Override
+        protected void onPostExecute(HashSet<String> selectedApps) {
+            super.onPostExecute(selectedApps);
+            for (AppModel appModel : appModels) {
+                if (selectedApps.contains(appModel.getPackageName())) {
+                    appModel.setSelected(true);
+                }
+            }
+
+            appAdapter = new AppAdapter(appModels, AppSelectionActivity.this);
+            recyclerView.setAdapter(appAdapter);
+        }
+    }
+
+    private class SavePreferencesTask extends AsyncTask<Void, Void, Void> {
+        private SharedPreferences preferences;
+        private List<String> selectedAppsList;
+
+        public SavePreferencesTask(SharedPreferences preferences, List<String> selectedAppsList) {
+            this.preferences = preferences;
+            this.selectedAppsList = selectedAppsList;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putStringSet("selectedApps", new HashSet<>(selectedAppsList));
+            editor.putBoolean("isAppSelectionDone", true);
+            editor.apply();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Intent intent = new Intent(AppSelectionActivity.this, MainActivity.class);
+            intent.putStringArrayListExtra("selectedApps", new ArrayList<>(selectedAppsList));
+            startActivity(intent);
+            finish();
         }
     }
 }

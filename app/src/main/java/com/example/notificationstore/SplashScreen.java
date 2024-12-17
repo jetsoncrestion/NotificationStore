@@ -1,10 +1,15 @@
 package com.example.notificationstore;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
+import android.text.TextPaint;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,9 +24,19 @@ public class SplashScreen extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_splash_screen);
 
+        TextView textView = findViewById(R.id.textView);
+        TextPaint paint = textView.getPaint();
+        float width = paint.measureText(textView.getText().toString());
+
         imageView = findViewById(R.id.imageView);
         animation = AnimationUtils.loadAnimation(this, R.anim.image_animation);
         imageView.startAnimation(animation);
+        textView.startAnimation(animation);
+
+        Shader textShader = new LinearGradient(0, 0, width, textView.getTextSize(),
+                new int[]{Color.parseColor("#5D3FD3"), Color.parseColor("#0F52BA")},
+                null, Shader.TileMode.CLAMP);
+        textView.getPaint().setShader(textShader);
 
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override

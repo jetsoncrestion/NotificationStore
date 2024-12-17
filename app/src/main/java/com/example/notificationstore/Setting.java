@@ -1,12 +1,20 @@
 package com.example.notificationstore;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,6 +24,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 import com.example.notificationstore.Model.DeleteNotificationModel;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -98,34 +107,142 @@ public class Setting extends AppCompatActivity {
         });
 
         cardView7.setOnClickListener(v -> {
-            // Create the AlertDialog for deleting all notifications
-            new AlertDialog.Builder(Setting.this).setTitle("Delete All Notifications").setMessage("Are you sure you want to delete all notifications?").setPositiveButton("Yes", (dialog, which) -> {
+            new AlertDialog.Builder(Setting.this).setTitle("Delete All Notifications").setMessage("Are you sure you want to delete all notifications?").setPositiveButton("Yes, Delete All", (dialog, which) -> {
                 deleteAllNotifications();
                 Toast.makeText(Setting.this, "All notifications deleted", Toast.LENGTH_SHORT).show();
             }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
         });
 
-        cardView8.setOnClickListener(v -> {
-            Intent intent = new Intent(Setting.this, DeleteNotificationActivity.class);
-            startActivity(intent);
+        cardView6.setOnClickListener(v -> {
+            showCustomDeleteAlertDialog();
         });
 
         autoDeleteOldNotifications();
+    }
 
-        toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            updateSwitchColors(toggleSwitch, isChecked);
-            if (isChecked) {
-                savePreference("hideSystemNotifications", true);
-            } else {
-                savePreference("hideSystemNotifications", false);
+    private void showCustomDeleteAlertDialog() {
+        TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
+        View dialogView = getLayoutInflater().inflate(R.layout.auto_delete_alert_dialog, null);
+
+        MaterialRadioButton radioButtonNeverDelete = dialogView.findViewById(R.id.radioButton);
+        MaterialRadioButton radioButtonDeleteDaily = dialogView.findViewById(R.id.radioButton2);
+        MaterialRadioButton radioButtonDeleteOlderThanOneWeek = dialogView.findViewById(R.id.radioButton3);
+        MaterialRadioButton radioButtonDeleteOlderThanOneMonth = dialogView.findViewById(R.id.radioButton4);
+        TextView textViewAccept = dialogView.findViewById(R.id.textViewAccept);
+        TextView textViewCancel = dialogView.findViewById(R.id.textViewCancel);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        String deleteOption = sharedPreferences.getString("delete_option", "delete_older_than_1_week");
+
+        if ("never_delete".equals(deleteOption)) {
+            radioButtonNeverDelete.setChecked(true);
+        } else if ("delete_daily".equals(deleteOption)) {
+            radioButtonDeleteDaily.setChecked(true);
+        } else if ("delete_older_than_1_week".equals(deleteOption)) {
+            radioButtonDeleteOlderThanOneWeek.setChecked(true);
+        } else if ("delete_older_than_1_month".equals(deleteOption)) {
+            radioButtonDeleteOlderThanOneMonth.setChecked(true);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout((int) (getResources().getDisplayMetrics().widthPixels * 0.90), WindowManager.LayoutParams.WRAP_CONTENT);
+                GradientDrawable drawable = new GradientDrawable();
+                drawable.setCornerRadius(60);
+                drawable.setColor(Color.WHITE);
+
+                window.setBackgroundDrawable(drawable);
             }
         });
-        toggleSwitchSecond.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            updateSwitchSecondColors(toggleSwitchSecond, isChecked);
-            if (isChecked) {
-                savePreference("hideDuplicateNotifications", true);
+
+        textViewCancel.setOnClickListener(v -> dialog.dismiss());
+
+        textViewAccept.setOnClickListener(v -> {
+            String selectedOption = "";
+
+            if (radioButtonNeverDelete.isChecked()) {
+                selectedOption = "Never delete";
+                performNeverDeleteLogic();
+                textViewAutoSubDeleteNotification.setText("Notifications will not be auto-deleted.");
+            } else if (radioButtonDeleteDaily.isChecked()) {
+                selectedOption = "Delete Daily";
+                performDeleteDailyLogic();
+                textViewAutoSubDeleteNotification.setText("Auto delete notifications daily.");
+            } else if (radioButtonDeleteOlderThanOneWeek.isChecked()) {
+                selectedOption = "Delete older than 1 week";
+                performDeleteOlderThanOneWeekLogic();
+                textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 week.");
+            } else if (radioButtonDeleteOlderThanOneMonth.isChecked()) {
+                selectedOption = "Delete older than 1 month";
+                performDeleteOlderThanOneMonthLogic();
+                textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 month.");
+            }
+
+
+            Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void performNeverDeleteLogic() {
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("delete_option", "never_delete");
+        editor.apply();
+
+        Toast.makeText(this, "Auto-delete is disabled. Notifications will not be deleted automatically.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void performDeleteDailyLogic() {
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("delete_option", "delete_daily");
+        editor.apply();
+        deleteOldNotifications(86400000L);
+    }
+
+    private void performDeleteOlderThanOneWeekLogic() {
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("delete_option", "delete_older_than_1_week");
+        editor.apply();
+        deleteOldNotifications(604800000L);
+    }
+
+    private void performDeleteOlderThanOneMonthLogic() {
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("delete_option", "delete_older_than_1_month");
+        editor.apply();
+        deleteOldNotifications(2592000000L);
+    }
+
+    private void deleteOldNotifications(long timeThreshold) {
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
+
+        deletedNotificationsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                    DeleteNotificationModel model = snapshot.getValue(DeleteNotificationModel.class);
+                    if (model != null && model.getTimeStamp() != 0) {
+                        long currentTime = System.currentTimeMillis();
+                        long notificationTime = model.getTimeStamp();
+                        long timeDifference = currentTime - notificationTime;
+
+                        if (timeDifference > timeThreshold) {
+                            deletedNotificationsRef.child(snapshot.getKey()).removeValue();
+                        }
+                    }
+                }
             } else {
-                savePreference("hideDuplicateNotifications", false);
+                Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -141,27 +258,20 @@ public class Setting extends AppCompatActivity {
     }
 
     private void autoDeleteOldNotifications() {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        String deleteOption = sharedPreferences.getString("delete_option", "never_delete");
 
-        deletedNotificationsRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                for (DataSnapshot snapshot : task.getResult().getChildren()) {
-                    DeleteNotificationModel model = snapshot.getValue(DeleteNotificationModel.class);
-                    if (model != null && model.getTimeStamp() != 0) {
-                        long currentTime = System.currentTimeMillis();
-                        long notificationTime = model.getTimeStamp();
-                        long timeDifference = currentTime - notificationTime;
+        if ("never_delete".equals(deleteOption)) {
+            return;
+        }
+        long timeThreshold = 2592000000L;
+        if ("delete_daily".equals(deleteOption)) {
+            timeThreshold = 86400000L;
+        } else if ("delete_older_than_1_week".equals(deleteOption)) {
+            timeThreshold = 604800000L;
+        }
 
-                        if (timeDifference > 2592000000L) {
-                            deletedNotificationsRef.child(snapshot.getKey()).removeValue();
-                            Toast.makeText(this, "Old notifications deleted", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            } else {
-                Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
-            }
-        });
+        deleteOldNotifications(timeThreshold);
     }
 
     private void updateSwitchColors(Switch toggleSwitch, boolean isChecked) {

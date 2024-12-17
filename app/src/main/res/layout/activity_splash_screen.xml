@@ -10,23 +10,21 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="@dimen/_300sdp"
-        android:layout_height="@dimen/_320sdp"
+        android:layout_width="@dimen/_320sdp"
+        android:layout_height="@dimen/_330sdp"
         android:contentDescription="logo"
-        android:layout_marginEnd="@dimen/_26sdp"
         android:layout_marginTop="@dimen/_90sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo_" />
+        app:srcCompat="@drawable/logo_we" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Notification Store"
+        android:text="NotifyVault"
         android:fontFamily="serif"
-        android:layout_marginTop="@dimen/_15sdp"
         android:textSize="@dimen/_28ssp"
         android:letterSpacing=".02"
         android:textStyle="bold"
