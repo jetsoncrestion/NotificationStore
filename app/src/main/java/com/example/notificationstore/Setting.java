@@ -4,11 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -45,6 +42,25 @@ public class Setting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_setting);
+
+        TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
+        SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
+        String deleteOption = sharedPreferences.getString("delete_option", "never_delete");
+
+        switch (deleteOption) {
+            case "delete_daily":
+                textViewAutoSubDeleteNotification.setText("Auto delete notifications daily.");
+                break;
+            case "delete_older_than_1_week":
+                textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 week.");
+                break;
+            case "delete_older_than_1_month":
+                textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 month.");
+                break;
+            default:
+                textViewAutoSubDeleteNotification.setText("Notifications will not be auto-deleted.");
+                break;
+        }
 
         imageViewBack = findViewById(R.id.imageViewBack);
         imageViewGreater = findViewById(R.id.imageViewGreater);
@@ -121,7 +137,7 @@ public class Setting extends AppCompatActivity {
     }
 
     private void showCustomDeleteAlertDialog() {
-        TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
+
         View dialogView = getLayoutInflater().inflate(R.layout.auto_delete_alert_dialog, null);
 
         MaterialRadioButton radioButtonNeverDelete = dialogView.findViewById(R.id.radioButton);
@@ -132,16 +148,23 @@ public class Setting extends AppCompatActivity {
         TextView textViewCancel = dialogView.findViewById(R.id.textViewCancel);
 
         SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
-        String deleteOption = sharedPreferences.getString("delete_option", "delete_older_than_1_week");
+        String deleteOption = sharedPreferences.getString("delete_option", "never_delete");
 
-        if ("never_delete".equals(deleteOption)) {
-            radioButtonNeverDelete.setChecked(true);
-        } else if ("delete_daily".equals(deleteOption)) {
-            radioButtonDeleteDaily.setChecked(true);
-        } else if ("delete_older_than_1_week".equals(deleteOption)) {
-            radioButtonDeleteOlderThanOneWeek.setChecked(true);
-        } else if ("delete_older_than_1_month".equals(deleteOption)) {
-            radioButtonDeleteOlderThanOneMonth.setChecked(true);
+        TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
+
+        switch (deleteOption) {
+            case "delete_daily":
+                radioButtonDeleteDaily.setChecked(true);
+                break;
+            case "delete_older_than_1_week":
+                radioButtonDeleteOlderThanOneWeek.setChecked(true);
+                break;
+            case "delete_older_than_1_month":
+                radioButtonDeleteOlderThanOneMonth.setChecked(true);
+                break;
+            default:
+                radioButtonNeverDelete.setChecked(true);
+                break;
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -166,23 +189,26 @@ public class Setting extends AppCompatActivity {
             String selectedOption = "";
 
             if (radioButtonNeverDelete.isChecked()) {
-                selectedOption = "Never delete";
+                selectedOption = "never_delete";
                 performNeverDeleteLogic();
                 textViewAutoSubDeleteNotification.setText("Notifications will not be auto-deleted.");
             } else if (radioButtonDeleteDaily.isChecked()) {
-                selectedOption = "Delete Daily";
+                selectedOption = "delete_daily";
                 performDeleteDailyLogic();
                 textViewAutoSubDeleteNotification.setText("Auto delete notifications daily.");
             } else if (radioButtonDeleteOlderThanOneWeek.isChecked()) {
-                selectedOption = "Delete older than 1 week";
+                selectedOption = "delete_older_than_1_week";
                 performDeleteOlderThanOneWeekLogic();
                 textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 week.");
             } else if (radioButtonDeleteOlderThanOneMonth.isChecked()) {
-                selectedOption = "Delete older than 1 month";
+                selectedOption = "delete_older_than_1_month";
                 performDeleteOlderThanOneMonthLogic();
                 textViewAutoSubDeleteNotification.setText("Delete notifications older than 1 month.");
             }
 
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("delete_option", selectedOption);
+            editor.apply();
 
             Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
             dialog.dismiss();

@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -165,6 +169,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         AlertDialog dialog = builder.setView(dialogView)
                 .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout((int) (context.getResources().getDisplayMetrics().widthPixels * 0.90), WindowManager.LayoutParams.WRAP_CONTENT);
+                GradientDrawable drawable = new GradientDrawable();
+                drawable.setCornerRadius(60);
+                drawable.setColor(Color.WHITE);
+
+                window.setBackgroundDrawable(drawable);
+            }
+        });
 
         dialog.show();
 

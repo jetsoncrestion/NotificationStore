@@ -35,10 +35,32 @@ public class MyNotificationListenerService extends NotificationListenerService {
         String title = sbn.getNotification().extras.getString("android.title");
         String text = sbn.getNotification().extras.getString("android.text");
         String subject = sbn.getNotification().extras.getString("android.subText");
+        String bigText = sbn.getNotification().extras.getString("android.bigText");
+
+        if (packageName.equals("com.google.android.youtube")) {
+            if (TextUtils.isEmpty(title)) {
+                title = sbn.getNotification().extras.getString("android.title.big");
+            }
+            if (TextUtils.isEmpty(text)) {
+                text = sbn.getNotification().extras.getString("android.text");
+            }
+            if (TextUtils.isEmpty(text)) {
+                text = sbn.getNotification().extras.getString("android.bigText");
+            }
+        }
 
         Bundle extras = sbn.getNotification().extras;
         for (String key : extras.keySet()) {
             Log.d(TAG, "Key: " + key + " Value: " + extras.get(key));
+        }
+
+        if (packageName.equals("com.google.android.gm")) {
+            if (TextUtils.isEmpty(title)) {
+                title = subject;
+            }
+            if (TextUtils.isEmpty(text)) {
+                text = bigText;
+            }
         }
 
         if (packageName.equals("com.facebook.katana")) {
@@ -57,23 +79,26 @@ public class MyNotificationListenerService extends NotificationListenerService {
             }
         } else if (packageName.equals("com.google.android.youtube")) {
             if (TextUtils.isEmpty(title)) {
-                title = sbn.getNotification().extras.getString("com.google.android.youtube.Title");
+                title = sbn.getNotification().extras.getString("android.title.big");
+            }
+            if (TextUtils.isEmpty(title)) {
+                title = sbn.getNotification().extras.getString("android.title");
             }
             if (TextUtils.isEmpty(text)) {
-                text = sbn.getNotification().extras.getString("com.google.android.youtube.Text");
+                text = sbn.getNotification().extras.getString("android.text");
+            }
+            if (TextUtils.isEmpty(text)) {
+                text = sbn.getNotification().extras.getString("android.bigText");
             }
         }
 
-        if (TextUtils.isEmpty(title)) {
-            title = subject;
-        }
-
-        if (TextUtils.isEmpty(title)) {
-            title = sbn.getNotification().extras.getString("android.subText");
-        }
-        if (TextUtils.isEmpty(text)) {
-            text = sbn.getNotification().extras.getString("android.textLines");
-        }
+//        if (TextUtils.isEmpty(title)) {
+//            title = "No Title";
+//        }
+//
+//        if (TextUtils.isEmpty(text)) {
+//            text = "No Text";
+//        }
 
         String heading = title;
         long timestamp = sbn.getPostTime();
@@ -104,10 +129,10 @@ public class MyNotificationListenerService extends NotificationListenerService {
                 return;
             }
 
-            if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
-                Log.d(TAG, "Notification received too soon after the last one, skipping.");
-                return;
-            }
+//            if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
+//                Log.d(TAG, "Notification received too soon after the last one, skipping.");
+//                return;
+//            }
         }
 
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());

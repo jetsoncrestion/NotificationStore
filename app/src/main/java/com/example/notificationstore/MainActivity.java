@@ -4,6 +4,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -12,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -81,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         imageViewSearch.setOnClickListener(v -> {
             toggleSearchView(imageSearch.getVisibility() != View.VISIBLE);
         });
-
 
         imageViewFilter.setOnClickListener(v -> {
             LayoutInflater inflater = LayoutInflater.from(this);
@@ -172,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
             ArrayAdapter<String> spinnerAdapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appNames);
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             appSpinner.setAdapter(spinnerAdapter);
@@ -184,6 +186,20 @@ public class MainActivity extends AppCompatActivity {
                     .setView(dialogView)
                     .setCancelable(false)
                     .create();
+
+            alertDialog.setOnShowListener(dialogInterface -> {
+                Window window = alertDialog.getWindow();
+                if (window != null) {
+                    window.setLayout((int) (getResources().getDisplayMetrics().widthPixels * 0.90), WindowManager.LayoutParams.WRAP_CONTENT);
+
+                    GradientDrawable drawable = new GradientDrawable();
+                    drawable.setShape(GradientDrawable.RECTANGLE);
+                    drawable.setCornerRadius(60);
+                    drawable.setColor(Color.WHITE);
+
+                    window.setBackgroundDrawable(drawable);
+                }
+            });
 
             textViewCancel.setOnClickListener(v1 -> alertDialog.dismiss());
 
@@ -200,9 +216,7 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
         });
 
-
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
-
         imageSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -287,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Error parsing dates: " + e.getMessage());
         }
 
-        // Filter notifications
         for (NotificationModel model : notificationModels) {
             if (model != null) {
                 boolean matchesApp = "All Apps".equals(selectedApp) ||
@@ -295,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("Date Filter", "Notification timestamp: " + model.getTimeStamp() + ", Start date: " + startDate + ", End date: " + endDate);
 
-                // Ensure that the timestamp is within the range
                 boolean matchesDate = model.getTimeStamp() >= start && model.getTimeStamp() <= end;
 
                 if (matchesApp && matchesDate) {
@@ -304,7 +316,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Log.d(TAG, "Filtered notifications count: " + filteredList.size());
-        // Update RecyclerView
         notificationAdapter.updateData(filteredList);
 
     }
@@ -312,16 +323,16 @@ public class MainActivity extends AppCompatActivity {
     private void toggleSearchView(boolean show) {
         if (show) {
             imageSearch.setVisibility(View.VISIBLE);
-            imageSearch.setAlpha(0f); // Start with invisible
+            imageSearch.setAlpha(0f);
             imageSearch.animate()
-                    .alpha(1f) // Fade in
+                    .alpha(1f)
                     .setDuration(300)
                     .start();
         } else {
             imageSearch.animate()
-                    .alpha(0f) // Fade out
+                    .alpha(0f)
                     .setDuration(300)
-                    .withEndAction(() -> imageSearch.setVisibility(View.GONE)) // Hide after fade out
+                    .withEndAction(() -> imageSearch.setVisibility(View.GONE))
                     .start();
         }
     }
@@ -380,13 +391,11 @@ public class MainActivity extends AppCompatActivity {
 
         notificationAdapter.updateData(filteredList);
 
-        // Show or hide the "Nothing Found" message directly in the listener
         if (filteredList.isEmpty()) {
-            textViewNothingFound.setVisibility(View.VISIBLE);  // Show "Nothing Found" message
+            textViewNothingFound.setVisibility(View.VISIBLE);
         } else {
-            textViewNothingFound.setVisibility(View.GONE);  // Hide "Nothing Found" message
+            textViewNothingFound.setVisibility(View.GONE);
         }
-
 
         //notificationAdapter.updateData(filteredList);
         Log.d(TAG, "Filtered notifications count: " + filteredList.size());

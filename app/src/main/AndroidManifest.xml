@@ -22,6 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationStore"
         tools:targetApi="31">
+        <activity
+            android:name=".ChangePin"
+            android:exported="false" />
+        <activity
+            android:name=".SecurityActivity"
+            android:exported="false" />
 
         <service
             android:name=".MyNotificationListenerService"
