@@ -20,4 +20,7 @@
     <color name="switch_thumb_on">#1E88E5</color> <!-- Strong blue for thumb -->
     <color name="switch_track_on">#81D4FA</color> <!-- Soft Blue for Track -->
 
+    <color name="novelPrimary">#6A5ACD</color>
+    <color name="novelPrimaryText">#483D8B</color>
+
 </resources>

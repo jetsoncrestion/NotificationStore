@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="primary">#222831</color>
-    <color name="secondary">#FFD369</color>
-    <color name="background">#121212</color>
-    <color name="accent">#BB9457</color>
-    <color name="headingText">#E0E0E0</color>
-    <color name="subHeadingText">#B0B0B0</color>
-    <color name="paragraphHeadingText">#CCCCCC</color>
-    <color name="special">#FFFFFF</color>
+<!--    <color name="black">#FF000000</color>-->
+<!--    <color name="white">#FFFFFFFF</color>-->
+<!--    <color name="primary">#222831</color>-->
+<!--    <color name="secondary">#FFD369</color>-->
+<!--    <color name="background">#121212</color>-->
+<!--    <color name="accent">#BB9457</color>-->
+<!--    <color name="headingText">#E0E0E0</color>-->
+<!--    <color name="subHeadingText">#B0B0B0</color>-->
+<!--    <color name="paragraphHeadingText">#CCCCCC</color>-->
+<!--    <color name="special">#FFFFFF</color>-->
 
 
-    <color name="switch_thumb_off">#D1D8DC</color>
-    <color name="switch_track_off">#B0BEC5</color>
+<!--    <color name="switch_thumb_off">#D1D8DC</color>-->
+<!--    <color name="switch_track_off">#B0BEC5</color>-->
 
-    <!-- ON State (Blue tones) -->
-    <color name="switch_thumb_on">#1E88E5</color>
-    <color name="switch_track_on">#81D4FA</color>
+<!--    &lt;!&ndash; ON State (Blue tones) &ndash;&gt;-->
+<!--    <color name="switch_thumb_on">#1E88E5</color>-->
+<!--    <color name="switch_track_on">#81D4FA</color>-->
 </resources>

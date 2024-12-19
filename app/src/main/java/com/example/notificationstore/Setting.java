@@ -31,7 +31,7 @@ public class Setting extends AppCompatActivity {
     private Switch toggleSwitch, toggleSwitchSecond;
     private String deviceId;
     private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8;
-
+//private TextView textView4;
     private int thumbOnColor;
     private int thumbOffColor;
     private int trackOnColor;
@@ -42,6 +42,7 @@ public class Setting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_setting);
+        //textView4 = findViewById(R.id.textView4);
 
         TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
         SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
@@ -94,6 +95,11 @@ public class Setting extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+//        textView4.setOnClickListener(v -> {
+//            Intent intent = new Intent(Setting.this, SecurityActivity.class);
+//            startActivity(intent);
+//        });
 
         imageViewGreater.setOnClickListener(v -> {
             Intent intent = new Intent(Setting.this, AppSelectionActivity.class);

@@ -5,40 +5,40 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChangePin">
+    tools:context=".ForgetPin">
 
     <TextView
-        android:id="@+id/textViewChangePin"
+        android:id="@+id/textViewResetPin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Change Pin"
+        android:text="Reset Pin"
         android:textSize="@dimen/_24ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/oldPin_TextInputLayout"
+        android:id="@+id/recoveryPin_TextInputLayout"
         android:layout_width="@dimen/_280sdp"
         android:layout_height="@dimen/_45sdp"
-        app:layout_constraintEnd_toEndOf="@+id/textViewChangePin"
-        app:layout_constraintStart_toStartOf="@+id/textViewChangePin"
-        app:layout_constraintTop_toBottomOf="@+id/textViewChangePin">
+        app:layout_constraintEnd_toEndOf="@+id/textViewResetPin"
+        app:layout_constraintStart_toStartOf="@+id/textViewResetPin"
+        app:layout_constraintTop_toBottomOf="@+id/textViewResetPin">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/oldPin_textInput"
+            android:id="@+id/recoveryPin_textInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Old Pin" />
+            android:hint="Recovery Pin" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/newPin_TextInputLayout"
         android:layout_width="@dimen/_280sdp"
         android:layout_height="@dimen/_45sdp"
-        app:layout_constraintEnd_toEndOf="@+id/oldPin_TextInputLayout"
-        app:layout_constraintStart_toStartOf="@+id/oldPin_TextInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/oldPin_TextInputLayout">
+        app:layout_constraintEnd_toEndOf="@+id/recoveryPin_TextInputLayout"
+        app:layout_constraintStart_toStartOf="@+id/recoveryPin_TextInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/recoveryPin_TextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/newPin_textInput"
@@ -56,13 +56,13 @@
         app:layout_constraintTop_toBottomOf="@+id/newPin_TextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/confirmNewPin_textInput"
+            android:id="@+id/conformNewPin_textInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Confirm New Pin" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
+    <Button
         android:id="@+id/buttonSaveChanges"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -70,5 +70,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmNewPin_TextInputLayout" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
