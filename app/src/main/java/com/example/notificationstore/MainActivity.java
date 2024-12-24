@@ -1,6 +1,7 @@
 package com.example.notificationstore;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private String deviceId;
     TextView textViewNothingFound;
     private ImageView imageViewSetting, imageViewSearch, imageViewFilter;
-    private SearchView imageSearch;
+    private SearchView searchView;
     private int thumbOnColor, thumbOffColor, trackOnColor, trackOffColor;
     private TextView textViewFromCalender, textViewUntilCalender;
 
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
         imageViewSetting = findViewById(R.id.imageViewSetting);
-        imageSearch = findViewById(R.id.searchView);
+        searchView = findViewById(R.id.searchView);
         imageViewSearch = findViewById(R.id.imageViewSearch);
         textViewNothingFound = findViewById(R.id.textViewNothingFound);
         imageViewFilter = findViewById(R.id.imageViewFilter);
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imageViewSearch.setOnClickListener(v -> {
-            toggleSearchView(imageSearch.getVisibility() != View.VISIBLE);
+            toggleSearchView(searchView.getVisibility() != View.VISIBLE);
         });
 
         imageViewFilter.setOnClickListener(v -> {
@@ -179,8 +180,8 @@ public class MainActivity extends AppCompatActivity {
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             appSpinner.setAdapter(spinnerAdapter);
 
-            textViewFromCalender.setOnClickListener(v1 -> showDatePicker(textViewFromCalender));
-            textViewUntilCalender.setOnClickListener(v1 -> showDatePicker(textViewUntilCalender));
+            textViewFromCalender.setOnClickListener(v1 -> showDatePickerWithTime(textViewFromCalender));
+            textViewUntilCalender.setOnClickListener(v1 -> showDatePickerWithTime(textViewUntilCalender));
 
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setView(dialogView)
@@ -217,13 +218,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
-        imageSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String startDate = textViewFromCalender.getText().toString();
-                String endDate = textViewUntilCalender.getText().toString();
-                filterNotifications(query, startDate, endDate);
-                return false;
+                if (!TextUtils.isEmpty(query)) {
+                    String startDate = textViewFromCalender.getText().toString();
+                    String endDate = textViewUntilCalender.getText().toString();
+                    filterNotifications(query, startDate, endDate);
+                }
+                searchView.clearFocus();
+                return true;
             }
 
             @Override
@@ -231,10 +235,9 @@ public class MainActivity extends AppCompatActivity {
                 String startDate = textViewFromCalender.getText().toString();
                 String endDate = textViewUntilCalender.getText().toString();
                 filterNotifications(newText, startDate, endDate);
-                return false;
+                return true;
             }
         });
-
 
         if (!isNotificationListenerEnabled()) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
@@ -322,18 +325,23 @@ public class MainActivity extends AppCompatActivity {
 
     private void toggleSearchView(boolean show) {
         if (show) {
-            imageSearch.setVisibility(View.VISIBLE);
-            imageSearch.setAlpha(0f);
-            imageSearch.animate()
+            searchView.setVisibility(View.VISIBLE);
+            searchView.setAlpha(0f);
+            searchView.animate()
                     .alpha(1f)
                     .setDuration(300)
                     .start();
+            searchView.requestFocus();
         } else {
-            imageSearch.animate()
+            searchView.animate()
                     .alpha(0f)
                     .setDuration(300)
-                    .withEndAction(() -> imageSearch.setVisibility(View.GONE))
+                    .withEndAction(() -> {
+                        searchView.setVisibility(View.GONE);
+                        searchView.setQuery("", false); // Reset query
+                    })
                     .start();
+            searchView.clearFocus();
         }
     }
 
@@ -361,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
         long start = Long.MIN_VALUE;
         long end = Long.MAX_VALUE;
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
         try {
             if (!TextUtils.isEmpty(startDate)) {
@@ -371,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
                 end = dateFormat.parse(endDate).getTime();
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error parsing dates: " + e.getMessage());
+            Log.e(TAG, "Error parsing date and time: " + e.getMessage());
         }
 
         for (NotificationModel model : notificationModels) {
@@ -449,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
         return enabledListeners != null && enabledListeners.contains(getPackageName());
     }
 
-    private void showDatePicker(TextView textView) {
+    private void showDatePickerWithTime(TextView textView) {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -457,10 +465,25 @@ public class MainActivity extends AppCompatActivity {
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, month1, dayOfMonth) -> {
-                    String date = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, month1 + 1, dayOfMonth);
-                    textView.setText(date);
-                    Log.d(TAG, "Date selected: " + date);
+                    // After selecting the date, show the time picker dialog
+                    showTimePicker(textView, year1, month1, dayOfMonth);
                 }, year, month, day);
         datePickerDialog.show();
+    }
+
+    private void showTimePicker(TextView textView, int year, int month, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                (view, hourOfDay, minuteOfHour) -> {
+                    // Format the date and time as a single string
+                    String dateTime = String.format(Locale.getDefault(),
+                            "%04d-%02d-%02d %02d:%02d", year, month + 1, dayOfMonth, hourOfDay, minuteOfHour);
+                    textView.setText(dateTime);
+                    Log.d(TAG, "Date and time selected: " + dateTime);
+                }, hour, minute, true);
+        timePickerDialog.show();
     }
 }

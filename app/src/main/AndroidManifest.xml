@@ -16,20 +16,35 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/logo_04"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationStore"
         tools:targetApi="31">
         <activity
-            android:name=".ForgetPin"
+            android:name=".AppSelectionSecond"
             android:exported="false" />
         <activity
-            android:name=".ChangePin"
+            android:name=".AppPermissionActivity"
             android:exported="false" />
         <activity
-            android:name=".SecurityActivity"
+            android:name=".PrivacyPolicyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TermsAndConditionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WelcomeFourth"
+            android:exported="false" />
+        <activity
+            android:name=".WelcomeThird"
+            android:exported="false" />
+        <activity
+            android:name=".WelcomeSecond"
+            android:exported="false" />
+        <activity
+            android:name=".WelcomeScreen"
             android:exported="false" />
 
         <service
@@ -50,12 +65,6 @@
         <activity
             android:name=".AppSelectionActivity"
             android:exported="true" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" />
         <activity
             android:name=".SplashScreen"
             android:exported="true">

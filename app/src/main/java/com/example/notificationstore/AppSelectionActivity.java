@@ -68,6 +68,8 @@ public class AppSelectionActivity extends AppCompatActivity {
             }
 
             new SavePreferencesTask(preferences, selectedAppsList).execute();
+            Intent intent = new Intent(AppSelectionActivity.this, AppPermissionActivity.class);
+            startActivity(intent);
         });
 
         loadApps();
@@ -156,7 +158,7 @@ public class AppSelectionActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Intent intent = new Intent(AppSelectionActivity.this, MainActivity.class);
+            Intent intent = new Intent(AppSelectionActivity.this, AppPermissionActivity.class);
             intent.putStringArrayListExtra("selectedApps", new ArrayList<>(selectedAppsList));
             startActivity(intent);
             finish();

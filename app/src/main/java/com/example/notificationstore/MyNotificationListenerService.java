@@ -22,12 +22,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MyNotificationListenerService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
-    private static String lastNotificationKey = null;
-    private static long lastSavedTime = 0;
-    private static final long MINIMUM_INTERVAL = 5000;
+    private final Set<String> recentNotifications = ConcurrentHashMap.newKeySet();
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -110,6 +109,16 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
+        String notificationKey = packageName + "|" + title + "|" + text;
+
+        // Check for duplicates
+        if (!recentNotifications.add(notificationKey)) {
+            Log.d(TAG, "Duplicate notification detected: " + notificationKey + ", skipping.");
+            return;
+        }
+        new android.os.Handler().postDelayed(() -> recentNotifications.remove(notificationKey), 5 * 60 * 1000);
+
+
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean showAllNotifications = preferences.getBoolean("hideSystemNotifications", false);
         boolean allowDuplicates = preferences.getBoolean("hideDuplicateNotifications", false);
@@ -123,17 +132,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
 
         String currentNotificationKey = packageName + "|" + title + "|" + text;
-        if (!allowDuplicates) {
-            if (currentNotificationKey.equals(lastNotificationKey)) {
-                Log.d(TAG, "Duplicate notification detected, skipping.");
-                return;
-            }
-
-//            if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
-//                Log.d(TAG, "Notification received too soon after the last one, skipping.");
-//                return;
-//            }
-        }
 
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
 
@@ -149,18 +147,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
             Log.d(TAG, "Ignored notification from System UI.");
             return;
         }
-
-        if (currentNotificationKey.equals(lastNotificationKey)) {
-            Log.d(TAG, "Duplicate notification detected, skipping.");
-            return;
-        }
-
-        if (timestamp - lastSavedTime < MINIMUM_INTERVAL) {
-            Log.d(TAG, "Notification received too soon after the last one, skipping.");
-            return;
-        }
-        lastNotificationKey = currentNotificationKey;
-        lastSavedTime = timestamp;
 
         PackageManager pm = getPackageManager();
         String appName;

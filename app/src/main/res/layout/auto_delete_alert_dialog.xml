@@ -4,11 +4,13 @@
     android:paddingStart="@dimen/_20sdp"
     android:paddingTop="@dimen/_10sdp"
     android:paddingEnd="@dimen/_20sdp"
+    android:background="@color/background"
     android:paddingBottom="@dimen/_10sdp">
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:background="@color/background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

@@ -5,30 +5,30 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="#FF2F6DF2"
     tools:context=".SplashScreen">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="@dimen/_320sdp"
-        android:layout_height="@dimen/_330sdp"
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="@dimen/_300sdp"
         android:contentDescription="logo"
         android:layout_marginTop="@dimen/_90sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo_we" />
+        app:srcCompat="@drawable/semi" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NotifyVault"
-        android:fontFamily="serif"
-        android:textSize="@dimen/_28ssp"
-        android:letterSpacing=".02"
+        android:text="Notify Vault"
+        android:fontFamily="@font/poppins_regular"
+        android:textSize="@dimen/_36ssp"
+        android:letterSpacing=".1"
         android:textStyle="bold"
-        android:textColor="@color/headingText"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />

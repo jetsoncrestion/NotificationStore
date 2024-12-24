@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    tools:context=".WelcomeThird">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_marginTop="@dimen/_150sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/search_next" />
+
+    <TextView
+        android:id="@+id/textViewHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_regular"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:textStyle="bold"
+        android:padding="@dimen/_6sdp"
+        android:text="Search by Text"
+        android:textAlignment="center"
+        android:textColor="@color/special"
+        android:textSize="@dimen/_20sdp"
+        app:layout_constraintEnd_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <TextView
+        android:id="@+id/textViewSubHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Easily find notifications by entering a text string. You can also refine your search by combining it with application and time-based filters."
+        android:fontFamily="@font/roboto"
+        android:padding="@dimen/_6sdp"
+        android:lineSpacingExtra="@dimen/_3sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:textAlignment="center"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@color/paragraphHeadingText"
+        app:layout_constraintEnd_toEndOf="@+id/textViewHeading"
+        app:layout_constraintStart_toStartOf="@+id/textViewHeading"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHeading" />
+
+    <TextView
+        android:id="@+id/textViewSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Skip"
+        android:layout_marginStart="@dimen/_15sdp"
+        android:layout_marginBottom="@dimen/_25sdp"
+        android:fontFamily="@font/roboto"
+        android:textColor="@color/paragraphHeadingText"
+        android:textSize="@dimen/_14ssp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageViewArrow"
+        android:layout_width="@dimen/_25sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:layout_marginEnd="@dimen/_15sdp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewSkip"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textViewSkip"
+        app:srcCompat="@drawable/arrow_right" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

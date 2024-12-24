@@ -30,7 +30,7 @@ public class Setting extends AppCompatActivity {
     private ImageView imageViewBack, imageViewGreater;
     private Switch toggleSwitch, toggleSwitchSecond;
     private String deviceId;
-    private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8;
+    private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8, cardViewTerms, cardViewPrivacy;
 //private TextView textView4;
     private int thumbOnColor;
     private int thumbOffColor;
@@ -73,6 +73,9 @@ public class Setting extends AppCompatActivity {
         cardView6 = findViewById(R.id.cardView6);
         cardView7 = findViewById(R.id.cardView7);
         cardView8 = findViewById(R.id.cardView8);
+        cardViewTerms = findViewById(R.id.cardViewTerms);
+        cardViewPrivacy = findViewById(R.id.cardViewPrivacy);
+
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
         thumbOnColor = ContextCompat.getColor(this, R.color.switch_thumb_on);
@@ -100,6 +103,16 @@ public class Setting extends AppCompatActivity {
 //            Intent intent = new Intent(Setting.this, SecurityActivity.class);
 //            startActivity(intent);
 //        });
+
+        cardViewTerms.setOnClickListener(v -> {
+            Intent intent = new Intent(Setting.this, TermsAndConditionsActivity.class);
+            startActivity(intent);
+        });
+
+        cardViewPrivacy.setOnClickListener(v -> {
+            Intent intent = new Intent(Setting.this, PrivacyPolicyActivity.class);
+            startActivity(intent);
+        });
 
         imageViewGreater.setOnClickListener(v -> {
             Intent intent = new Intent(Setting.this, AppSelectionActivity.class);
@@ -216,7 +229,7 @@ public class Setting extends AppCompatActivity {
             editor.putString("delete_option", selectedOption);
             editor.apply();
 
-            Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
+           // Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
@@ -229,7 +242,7 @@ public class Setting extends AppCompatActivity {
         editor.putString("delete_option", "never_delete");
         editor.apply();
 
-        Toast.makeText(this, "Auto-delete is disabled. Notifications will not be deleted automatically.", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Auto-delete is disabled. Notifications will not be deleted automatically.", Toast.LENGTH_SHORT).show();
     }
 
     private void performDeleteDailyLogic() {

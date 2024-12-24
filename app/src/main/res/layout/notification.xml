@@ -111,8 +111,8 @@
 
             <ImageView
                 android:id="@+id/imageButtonDelete"
-                android:layout_width="@dimen/_25sdp"
-                android:layout_height="@dimen/_25sdp"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 app:layout_constraintEnd_toEndOf="parent"
