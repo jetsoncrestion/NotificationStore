@@ -73,4 +73,46 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textViewSkip"
         app:srcCompat="@drawable/arrow_right" />
+
+    <LinearLayout
+        android:id="@+id/indicatorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewSkip"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewArrow"
+        app:layout_constraintStart_toEndOf="@+id/textViewSkip"
+        app:layout_constraintTop_toTopOf="@+id/imageViewArrow"
+        app:layout_constraintVertical_bias="0.25">
+
+        <View
+            android:id="@+id/dot1"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
+            android:background="@drawable/circle_inactive" />
+
+        <View
+            android:id="@+id/dot2"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
+            android:background="@drawable/circle_active" />
+
+        <View
+            android:id="@+id/dot3"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
+            android:background="@drawable/circle_inactive" />
+
+        <View
+            android:id="@+id/dot4"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
+            android:background="@drawable/circle_inactive" />
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

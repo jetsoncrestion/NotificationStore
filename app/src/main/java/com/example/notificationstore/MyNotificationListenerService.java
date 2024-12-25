@@ -131,8 +131,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
             }
         }
 
-        String currentNotificationKey = packageName + "|" + title + "|" + text;
-
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
 
         // Log the selected apps to verify

@@ -97,6 +97,7 @@ public class AppSelectionActivity extends AppCompatActivity {
                 apps.add(new AppModel(appName, appInfo.packageName, false, appIcon));
             }
         }
+        apps.sort((app1, app2) -> app1.getAppName().compareToIgnoreCase(app2.getAppName()));
         return apps;
     }
 
