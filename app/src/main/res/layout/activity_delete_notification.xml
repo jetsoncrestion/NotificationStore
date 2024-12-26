@@ -28,7 +28,8 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Deleted Notifications"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_24sdp"
+                android:textSize="@dimen/_22sdp"
+                android:layout_marginTop="@dimen/_4sdp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -37,8 +38,8 @@
 
             <ImageView
                 android:id="@+id/imageBack"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_30sdp"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
                 android:layout_marginStart="@dimen/_10sdp"
                 app:layout_constraintBottom_toBottomOf="@+id/noDeletedItemsTextView"
                 app:layout_constraintStart_toStartOf="parent"

@@ -3,4 +3,6 @@
     <string name="permissionTextFirst">This application will securely store all notifications you receive from the selected apps, allowing you to view them at your convenience.</string>
     <string name="permissionTextSecond">To enable this feature, please grant permission to access notifications on this device.</string>
     <string name="permissionTextThird">Tap the button below to open a new screen displaying all apps requesting this permission. Kindly locate Notify Vault and enable it as demonstrated in the image below.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

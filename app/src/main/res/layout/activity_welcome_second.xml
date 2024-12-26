@@ -54,13 +54,13 @@
         android:id="@+id/textViewSkip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Skip"
-        android:textColor="@color/paragraphHeadingText"
-        android:textAlignment="center"
         android:fontFamily="@font/roboto"
-        android:textSize="@dimen/_14ssp"
-        android:layout_marginBottom="@dimen/_25sdp"
+        android:text="Skip"
         android:layout_marginStart="@dimen/_15sdp"
+        android:layout_marginBottom="@dimen/_25sdp"
+        android:textAlignment="center"
+        android:textColor="@color/paragraphHeadingText"
+        android:textSize="@dimen/_16ssp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -80,11 +80,10 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/textViewSkip"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewArrow"
         app:layout_constraintEnd_toStartOf="@+id/imageViewArrow"
         app:layout_constraintStart_toEndOf="@+id/textViewSkip"
-        app:layout_constraintTop_toTopOf="@+id/imageViewArrow"
-        app:layout_constraintVertical_bias="0.25">
+        app:layout_constraintTop_toTopOf="@+id/textViewSkip">
 
         <View
             android:id="@+id/dot1"
@@ -95,7 +94,7 @@
 
         <View
             android:id="@+id/dot2"
-            android:layout_width="@dimen/_10sdp"
+            android:layout_width="15dp"
             android:layout_height="@dimen/_10sdp"
             android:layout_marginEnd="@dimen/_6sdp"
             android:background="@drawable/circle_active" />
@@ -115,4 +114,5 @@
             android:background="@drawable/circle_inactive" />
 
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

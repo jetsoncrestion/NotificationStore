@@ -9,6 +9,8 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -31,26 +33,21 @@ public class MyNotificationListenerService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
+
         String title = sbn.getNotification().extras.getString("android.title");
         String text = sbn.getNotification().extras.getString("android.text");
         String subject = sbn.getNotification().extras.getString("android.subText");
         String bigText = sbn.getNotification().extras.getString("android.bigText");
 
-        if (packageName.equals("com.google.android.youtube")) {
-            if (TextUtils.isEmpty(title)) {
-                title = sbn.getNotification().extras.getString("android.title.big");
-            }
-            if (TextUtils.isEmpty(text)) {
-                text = sbn.getNotification().extras.getString("android.text");
-            }
-            if (TextUtils.isEmpty(text)) {
-                text = sbn.getNotification().extras.getString("android.bigText");
-            }
-        }
-
         Bundle extras = sbn.getNotification().extras;
         for (String key : extras.keySet()) {
             Log.d(TAG, "Key: " + key + " Value: " + extras.get(key));
+        }
+
+        if (text != null && text.matches("\\d+ new messages")) {
+            Log.d(TAG, "Multi-message notification detected: " + text);
+            handleMultiMessageNotification(packageName, text);
+            return;
         }
 
         if (packageName.equals("com.google.android.gm")) {
@@ -91,14 +88,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
             }
         }
 
-//        if (TextUtils.isEmpty(title)) {
-//            title = "No Title";
-//        }
-//
-//        if (TextUtils.isEmpty(text)) {
-//            text = "No Text";
-//        }
-
         String heading = title;
         long timestamp = sbn.getPostTime();
 
@@ -109,19 +98,16 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
-        String notificationKey = packageName + "|" + title + "|" + text;
+        String notificationKey = packageName + "|" + heading + "|" + text + "|" + timestamp;
 
-        // Check for duplicates
         if (!recentNotifications.add(notificationKey)) {
             Log.d(TAG, "Duplicate notification detected: " + notificationKey + ", skipping.");
             return;
         }
-        new android.os.Handler().postDelayed(() -> recentNotifications.remove(notificationKey), 5 * 60 * 1000);
-
+        new Handler(Looper.getMainLooper()).postDelayed(() -> recentNotifications.remove(notificationKey), 2000);
 
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean showAllNotifications = preferences.getBoolean("hideSystemNotifications", false);
-        boolean allowDuplicates = preferences.getBoolean("hideDuplicateNotifications", false);
 
         if (!showAllNotifications) {
             Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
@@ -133,7 +119,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
 
-        // Log the selected apps to verify
         Log.d(TAG, "Selected apps: " + selectedApps);
 
         if (!selectedApps.contains(packageName)) {
@@ -188,6 +173,10 @@ public class MyNotificationListenerService extends NotificationListenerService {
         } else {
             Log.e(TAG, "Failed to generate notification ID.");
         }
+    }
+
+    private void handleMultiMessageNotification(String packageName, String messageSummary) {
+        Log.d(TAG, "Processing multi-message summary: " + messageSummary);
     }
 
     private String drawableToBase64(Drawable drawable) {

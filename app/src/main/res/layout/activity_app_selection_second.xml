@@ -5,15 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="@color/background"
+    android:background="@color/background"
     tools:context=".AppSelectionSecond">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView2"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_60sdp"
+        android:layout_height="@dimen/_55sdp"
         android:backgroundTint="#1E88E5"
-        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginTop="@dimen/_26sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">

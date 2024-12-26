@@ -49,4 +49,5 @@ dependencies {
     implementation("com.intuit.sdp:sdp-android:1.1.1")
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
 }

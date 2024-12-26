@@ -15,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 public class WelcomeThird extends AppCompatActivity {
     private TextView textViewSkip;
     private ImageView imageViewArrow;
-
     private static final String PREFS_NAME = "MyPrefs";
     private static final String KEY_WELCOME_THIRD_SCREEN_SHOWN = "welcome_third_screen_shown";
 

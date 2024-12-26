@@ -11,9 +11,8 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_50sdp"
+        android:layout_height="@dimen/_40sdp"
         android:backgroundTint="#1E88E5"
-        android:layout_marginTop="@dimen/_26sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -29,7 +28,8 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Notifiy Vault"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_24sdp"
+                android:textSize="@dimen/_22sdp"
+                android:layout_marginTop="@dimen/_4sdp"
                 android:textStyle="bold"
                 android:layout_marginStart="@dimen/_20sdp"
                 app:layout_constraintBottom_toBottomOf="parent"

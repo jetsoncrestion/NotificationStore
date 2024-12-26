@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +23,7 @@ public class WelcomeFourth extends AppCompatActivity {
     private static final String TAG = "WelcomeFourth";
     private static final String SHARED_PREFS = "shared_prefs";
     private static final String KEY_POLICIES_ACCEPTED = "policies_accepted";
-
+    private static final String KEY_WELCOME_FOURTH_SCREEN_SHOWN = "welcome_fourth_screen_shown";
     private Button buttonStart;
     private CheckBox checkBox;
     private TextView textViewCheckboxTitle;
@@ -32,10 +33,8 @@ public class WelcomeFourth extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
-        // Check if policies are already accepted
         boolean policiesAccepted = sharedPreferences.getBoolean(KEY_POLICIES_ACCEPTED, false);
 
         Log.d(TAG, "Policies accepted: " + policiesAccepted);
@@ -115,8 +114,8 @@ public class WelcomeFourth extends AppCompatActivity {
         @Override
         public void updateDrawState(TextPaint ds) {
             super.updateDrawState(ds);
-            ds.setColor(Color.BLUE); // Custom link color
-            ds.setUnderlineText(false); // Remove underline
+            ds.setColor(Color.BLUE);
+            ds.setUnderlineText(false);
         }
     }
 }

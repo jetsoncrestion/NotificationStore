@@ -142,7 +142,10 @@ public class Setting extends AppCompatActivity {
         });
 
         cardView7.setOnClickListener(v -> {
-            new AlertDialog.Builder(Setting.this).setTitle("Delete All Notifications").setMessage("Are you sure you want to delete all notifications?").setPositiveButton("Yes, Delete All", (dialog, which) -> {
+            new AlertDialog.Builder(Setting.this, R.style.AlertDialogCustom)
+                    .setTitle("Delete All Notifications")
+                    .setMessage("Are you sure you want to delete all notifications?")
+                    .setPositiveButton("Yes, Delete All", (dialog, which) -> {
                 deleteAllNotifications();
                 Toast.makeText(Setting.this, "All notifications deleted", Toast.LENGTH_SHORT).show();
             }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
