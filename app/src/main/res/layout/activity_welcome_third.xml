@@ -54,65 +54,24 @@
         android:id="@+id/textViewSkip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_25sdp"
+        android:layout_marginEnd="@dimen/_15sdp"
         android:fontFamily="@font/roboto"
+        android:textStyle="bold"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@color/special"
         android:text="Skip"
-        android:layout_marginBottom="@dimen/_25sdp"
-        android:layout_marginStart="@dimen/_15sdp"
-        android:textAlignment="center"
-        android:textColor="@color/paragraphHeadingText"
-        android:textSize="@dimen/_16ssp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageViewArrow"
-        android:layout_width="@dimen/_25sdp"
-        android:layout_height="@dimen/_25sdp"
+        android:id="@+id/imageViewArrowRight"
         android:layout_marginEnd="@dimen/_15sdp"
-        app:layout_constraintBottom_toBottomOf="@+id/textViewSkip"
+        android:layout_marginBottom="@dimen/_25sdp"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textViewSkip"
         app:srcCompat="@drawable/arrow_right" />
-
-    <LinearLayout
-        android:id="@+id/indicatorLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewArrow"
-        app:layout_constraintEnd_toStartOf="@+id/imageViewArrow"
-        app:layout_constraintStart_toEndOf="@+id/textViewSkip"
-        app:layout_constraintTop_toTopOf="@+id/textViewSkip">
-
-        <View
-            android:id="@+id/dot1"
-            android:layout_width="@dimen/_10sdp"
-            android:layout_height="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:background="@drawable/circle_inactive" />
-
-        <View
-            android:id="@+id/dot2"
-            android:layout_width="@dimen/_10sdp"
-            android:layout_height="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:background="@drawable/circle_inactive" />
-
-        <View
-            android:id="@+id/dot3"
-            android:layout_width="@dimen/_10sdp"
-            android:layout_height="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:background="@drawable/circle_active" />
-
-        <View
-            android:id="@+id/dot4"
-            android:layout_width="@dimen/_10sdp"
-            android:layout_height="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:background="@drawable/circle_inactive" />
-
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

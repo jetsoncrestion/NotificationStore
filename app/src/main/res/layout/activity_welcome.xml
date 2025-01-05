@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".WelcomeSecond">
+    tools:context=".WelcomeActivity">
 
     <ImageView
-        android:id="@+id/imageViewFilter"
-        android:layout_width="@dimen/_150sdp"
-        android:layout_height="@dimen/_150sdp"
+        android:id="@+id/imageViewLogo"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
         android:layout_marginTop="@dimen/_150sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/filtersecond" />
+        app:srcCompat="@drawable/logofinal" />
 
     <TextView
-        android:id="@+id/textViewHeading"
+        android:id="@+id/textViewWelcomeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
         android:fontFamily="@font/poppins_regular"
-        android:textSize="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:textStyle="bold"
-        android:textAlignment="center"
         android:padding="@dimen/_6sdp"
+        android:text="Welcome to Notify: Notifications History Saver!"
+        android:textAlignment="center"
         android:textColor="@color/special"
-        android:text="Find your perfect Notifications!"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewFilter"
-        app:layout_constraintStart_toStartOf="@+id/imageViewFilter"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewFilter" />
+        android:textSize="@dimen/_20sdp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewLogo"
+        app:layout_constraintStart_toStartOf="@+id/imageViewLogo"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewLogo" />
 
     <TextView
-        android:id="@+id/textViewSubHeading"
+        android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:padding="@dimen/_6sdp"
-        android:textSize="@dimen/_14ssp"
-        android:lineSpacingExtra="@dimen/_3sdp"
         android:layout_marginTop="@dimen/_8sdp"
-        android:textColor="@color/paragraphHeadingText"
-        android:text="Use the filter button to view only notifications from a specific app, ot rhose received within a time range; or combine both filter at the same time."
+        android:fontFamily="@font/roboto"
+        android:lineSpacingExtra="@dimen/_3sdp"
+        android:padding="@dimen/_6sdp"
+        android:text="Welcome to a smarter way to manage your notifications! Effortlessly keep track of all your notifications and access your history anytime, all in one place."
         android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="@+id/textViewHeading"
-        app:layout_constraintStart_toStartOf="@+id/textViewHeading"
-        app:layout_constraintTop_toBottomOf="@+id/textViewHeading" />
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_14ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewWelcomeText" />
 
     <TextView
         android:id="@+id/textViewSkip"

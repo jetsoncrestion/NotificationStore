@@ -10,23 +10,23 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="@dimen/_300sdp"
-        android:layout_height="@dimen/_300sdp"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_marginTop="208dp"
         android:contentDescription="logo"
-        android:layout_marginTop="@dimen/_90sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/semi" />
+        app:srcCompat="@drawable/asset1" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Notify Vault"
+        android:text="Notify: Notifications History Saver"
+        android:textAlignment="center"
         android:fontFamily="@font/poppins_regular"
-        android:textSize="@dimen/_36ssp"
-        android:letterSpacing=".1"
+        android:textSize="@dimen/_30ssp"
         android:textStyle="bold"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
