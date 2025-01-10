@@ -8,7 +8,7 @@
         android:fillColor="#00000000"
         android:pathData="M4,7H20"
         android:strokeWidth="2"
-        android:strokeColor="#1E88E5"
+        android:strokeColor="#F06924"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
 
@@ -16,7 +16,7 @@
         android:fillColor="#00000000"
         android:pathData="M7,12L17,12"
         android:strokeWidth="2"
-        android:strokeColor="#1E88E5"
+        android:strokeColor="#F06924"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
 
@@ -24,7 +24,7 @@
         android:fillColor="#00000000"
         android:pathData="M11,17H13"
         android:strokeWidth="2"
-        android:strokeColor="#1E88E5"
+        android:strokeColor="#F06924"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
 

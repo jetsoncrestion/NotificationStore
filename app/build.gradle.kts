@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.ratna.NotificationStore"
+    namespace = "com.ratna.notificationstore"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.ratna.NotificationStore"
+        applicationId = "com.ratna.notificationstore"
         minSdk = 28
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.3"
+        versionCode = 4
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -59,7 +59,7 @@
         android:fontFamily="@font/roboto"
         android:textStyle="bold"
         android:textSize="@dimen/_14ssp"
-        android:textColor="@color/special"
+        android:textColor="#F06924"
         android:text="Skip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

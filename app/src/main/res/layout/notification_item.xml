@@ -58,7 +58,7 @@
         android:layout_marginTop="@dimen/_14ssp"
         android:fontFamily="@font/roboto"
         android:text="Close"
-        android:textColor="#1E88E5"
+        android:textColor="#F06924"
         android:textSize="@dimen/_14sdp"
         android:textStyle="bold"
         android:layout_marginBottom="@dimen/_6sdp"
