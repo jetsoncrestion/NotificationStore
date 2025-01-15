@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
                 .child(deviceId)
                 .child("notifications");
 
-        databaseReference.orderByChild("timestamp").limitToLast(100).addValueEventListener(new ValueEventListener() {
+        databaseReference.orderByChild("timestamp").limitToLast(200).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 notificationModels.clear();
@@ -466,6 +466,8 @@ public class MainActivity extends AppCompatActivity {
                 notificationModels.clear();
                 notificationModels.addAll(reversedList);
 
+                autoDeleteOldNotifications();
+
                 notificationAdapter.notifyDataSetChanged();
                 Log.d(TAG, "Notifications loaded: " + notificationModels.size());
             }
@@ -475,6 +477,36 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to load notifications: " + error.getMessage());
             }
         });
+    }
+
+    private void autoDeleteOldNotifications() {
+        long currentTime = System.currentTimeMillis();
+        long ninetyDaysInMillis = 90L * 24 * 60 * 60 * 1000;
+
+        List<NotificationModel> toRemove = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("notifications");
+
+        for (NotificationModel model : notificationModels) {
+            if (model != null && model.getTimeStamp() < (currentTime - ninetyDaysInMillis)) {
+                toRemove.add(model);
+
+                // Delete from Firebase
+                if (model.getUniqueKey() != null) {
+                    databaseReference.child(model.getUniqueKey()).removeValue()
+                            .addOnSuccessListener(aVoid -> Log.d(TAG, "Deleted old notification: " + model.getUniqueKey()))
+                            .addOnFailureListener(e -> Log.e(TAG, "Failed to delete notification: " + model.getUniqueKey(), e));
+                }
+            }
+        }
+        notificationModels.removeAll(toRemove);
+
+        if (!toRemove.isEmpty()) {
+            notificationAdapter.notifyDataSetChanged();
+            Log.d(TAG, "Deleted " + toRemove.size() + " old notifications from local storage.");
+        }
     }
 
     private boolean isNotificationListenerEnabled() {

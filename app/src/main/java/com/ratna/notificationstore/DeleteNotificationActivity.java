@@ -81,9 +81,9 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
                         long notificationTime = model.getTimeStamp();
                         long timeDifference = currentTime - notificationTime;
 
-                        if (timeDifference > 2592000000L) {
+                        if (timeDifference > 7776000000L) {
                             deletedNotificationsRef.child(dataSnapshot.getKey()).removeValue();
-                            Log.d("AutoDelete", "Notification older than 30 days deleted");
+                            Log.d("AutoDelete", "Notification older than 90 days deleted");
                         }
                     }
                 }

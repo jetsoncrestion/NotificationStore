@@ -1,8 +1,13 @@
 <resources>
-    <string name="app_name">Notify: Notifications History Saver</string>
+    <string name="app_name">Notify: Notifications History</string>
     <string name="permissionTextFirst">This application will securely store all notifications you receive from the selected apps, allowing you to view them at your convenience.</string>
     <string name="permissionTextSecond">To enable this feature, please grant permission to access notifications on this device.</string>
     <string name="permissionTextThird">Tap the button below to open a new screen displaying all apps requesting this permission. Kindly locate Notify Vault and enable it as demonstrated in the image below.</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="welcomeFirstLine">Manage notifications smarter: track, restore, and access your history anytime.</string>
+    <string name="welcomeSecondLine">Do not Missed</string>
+    <string name="welcomeThirdLine">\u2022 Important deals</string>
+    <string name="welcomeFourthLine">\u2022 Coupon code </string>
+    <string name="welcomeFifthLine">\u2022 Messages</string>
+    <string name="welcomeSixthLine">\u2022 News</string>
+    <string name="welcomeSeventhLine">Catch them later with Notify. Stay organized and control which apps\' alerts you can store.</string>
 </resources>

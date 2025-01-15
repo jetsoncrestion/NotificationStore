@@ -29,7 +29,7 @@ public class WelcomeSecond extends AppCompatActivity {
         Log.d("WelcomeSecond", "isWelcomeSecondScreenShown: " + isWelcomeSecondScreenShown);
 
         if (isWelcomeSecondScreenShown) {
-            Intent intent = new Intent(WelcomeSecond.this, WelcomeFourth.class);
+            Intent intent = new Intent(WelcomeSecond.this, WelcomeThird.class);
             startActivity(intent);
             finish();
         } else {
@@ -39,7 +39,7 @@ public class WelcomeSecond extends AppCompatActivity {
                 editor.apply();
                 Log.d("WelcomeSecond", "isWelcomeSecondScreenShown updated: " + sharedPreferences.getBoolean(KEY_WELCOME_SECOND_SCREEN_SHOWN, false));
 
-                Intent intent = new Intent(WelcomeSecond.this, WelcomeFourth.class);
+                Intent intent = new Intent(WelcomeSecond.this, WelcomeThird.class);
                 startActivity(intent);
                 finish();
             });

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,9 +12,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,8 +32,10 @@ public class AppSelectionActivity extends AppCompatActivity {
     private AppAdapter appAdapter;
     private List<AppModel> appModels;
     private ImageView imageViewBack;
+    private CardView cardView9;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
+    private boolean isSelectAllEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +45,24 @@ public class AppSelectionActivity extends AppCompatActivity {
         imageViewBack = findViewById(R.id.imageViewBack);
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
+        cardView9 = findViewById(R.id.cardView9);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isAppSelectionDone = preferences.getBoolean("isAppSelectionDone", false);
         boolean isRevisiting = getIntent().getBooleanExtra("isRevisiting", false);
+        isSelectAllEnabled = preferences.getBoolean("isSelectAllEnabled", false);
+
+        Switch toggleSwitch = cardView9.findViewById(R.id.toggleSwitch);
+        toggleSwitch.setChecked(isSelectAllEnabled);
+        updateSwitchColors(toggleSwitch, isSelectAllEnabled);
+
+        toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isSelectAllEnabled = isChecked;
+            updateSwitchColors(toggleSwitch, isChecked); // Update colors on toggle
+            updateSelectAllState(isChecked);
+            saveSelectAllState(preferences, isChecked);
+        });
 
         if (isAppSelectionDone && !isRevisiting) {
             Intent intent = new Intent(AppSelectionActivity.this, MainActivity.class);
@@ -73,6 +92,16 @@ public class AppSelectionActivity extends AppCompatActivity {
         });
 
         loadApps();
+    }
+
+    private void updateSwitchColors(Switch toggleSwitch, boolean isChecked) {
+        int thumbOnColor = ContextCompat.getColor(this, R.color.switch_thumb_on);
+        int thumbOffColor = ContextCompat.getColor(this, R.color.switch_thumb_off);
+        int trackOnColor = ContextCompat.getColor(this, R.color.switch_track_on);
+        int trackOffColor = ContextCompat.getColor(this, R.color.switch_track_off);
+
+        toggleSwitch.setThumbTintList(ColorStateList.valueOf(isChecked ? thumbOnColor : thumbOffColor));
+        toggleSwitch.setTrackTintList(ColorStateList.valueOf(isChecked ? trackOnColor : trackOffColor));
     }
 
     private void loadApps() {
@@ -117,6 +146,19 @@ public class AppSelectionActivity extends AppCompatActivity {
         }
     }
 
+    private void updateSelectAllState(boolean isChecked) {
+        for (AppModel appModel : appModels) {
+            appModel.setSelected(isChecked);
+        }
+        appAdapter.notifyDataSetChanged();
+    }
+
+    private void saveSelectAllState(SharedPreferences preferences, boolean isChecked) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("isSelectAllEnabled", isChecked);
+        editor.apply();
+    }
+
     private class LoadSelectedAppsTask extends AsyncTask<Void, Void, HashSet<String>> {
         @Override
         protected HashSet<String> doInBackground(Void... voids) {
@@ -132,6 +174,11 @@ public class AppSelectionActivity extends AppCompatActivity {
                     appModel.setSelected(true);
                 }
             }
+
+            boolean allSelected = !appModels.isEmpty() && appModels.stream().allMatch(AppModel::isSelected);
+            isSelectAllEnabled = allSelected;
+            Switch toggleSwitch = cardView9.findViewById(R.id.toggleSwitch);
+            toggleSwitch.setChecked(allSelected);
 
             appAdapter = new AppAdapter(appModels, AppSelectionActivity.this);
             recyclerView.setAdapter(appAdapter);

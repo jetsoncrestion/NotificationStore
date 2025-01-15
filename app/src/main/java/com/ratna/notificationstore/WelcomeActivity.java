@@ -34,7 +34,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 editor.putBoolean(KEY_WELCOME_SCREEN_SHOWN, true);
                 editor.apply();
 
-                Intent intent = new Intent(WelcomeActivity.this, WelcomeFourth.class);
+                Intent intent = new Intent(WelcomeActivity.this, WelcomeThird.class);
                 startActivity(intent);
                 finish();
             });

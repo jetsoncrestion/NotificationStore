@@ -253,7 +253,7 @@ public class Setting extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("delete_option", "delete_daily");
         editor.apply();
-        deleteOldNotifications(86400000L);
+        deleteOldNotifications(43200000L);
     }
 
     private void performDeleteOlderThanOneWeekLogic() {
@@ -273,7 +273,7 @@ public class Setting extends AppCompatActivity {
     }
 
     private void deleteOldNotifications(long timeThreshold) {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
 
         deletedNotificationsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

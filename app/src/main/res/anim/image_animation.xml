@@ -5,35 +5,35 @@
 
     <!-- Animation for ImageView -->
     <alpha
-        android:duration="2500"
+        android:duration="1500"
         android:fromAlpha="0.0"
-        android:startOffset="500"
+        android:startOffset="200"
         android:toAlpha="1.0" />
 
+    <!-- Subtle Scale Effect -->
     <scale
-        android:duration="2500"
+        android:duration="1500"
         android:fromXScale="0.5"
         android:fromYScale="0.5"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:startOffset="500"
+        android:startOffset="200"
         android:toXScale="1.0"
         android:toYScale="1.0" />
 
-    <!-- Animation for TextView -->
-    <alpha
-        android:duration="2500"
-        android:fromAlpha="0.0"
-        android:startOffset="1000"
-        android:toAlpha="1.0" />
-
-    <scale
-        android:duration="2500"
-        android:fromXScale="0.5"
-        android:fromYScale="0.5"
+    <!-- Gentle Rotation for a Dynamic Effect -->
+    <rotate
+        android:duration="1500"
+        android:fromDegrees="-5"
+        android:toDegrees="0"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:startOffset="1000"
-        android:toXScale="1.0"
-        android:toYScale="1.0" />
+        android:startOffset="200" />
+
+    <!-- Slight Translation for a Dynamic Entrance -->
+    <translate
+        android:duration="1500"
+        android:fromYDelta="10%"
+        android:toYDelta="0"
+        android:startOffset="200" />
 </set>

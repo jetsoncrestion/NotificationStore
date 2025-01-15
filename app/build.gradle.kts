@@ -11,8 +11,8 @@ android {
         applicationId = "com.ratna.notificationstore"
         minSdk = 28
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.4"
+        versionCode = 5
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,4 +50,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation ("com.squareup.okhttp3:okhttp:3.9.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 }
