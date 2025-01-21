@@ -9,6 +9,7 @@ public class NotificationModel {
     private long notificationDateTime;
     private String appIconBase64;
     private String imageButtonDelete;
+    private String packageName;
 
     // Default constructor
     public NotificationModel() {
@@ -16,7 +17,7 @@ public class NotificationModel {
     }
 
     // Constructor with parameters
-    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete) {
+    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete, String packageName) {
         this.uniqueKey = uniqueKey;
         this.appName = appName;
         this.timeStamp = timeStamp == 0 ? System.currentTimeMillis() : timeStamp;
@@ -25,6 +26,7 @@ public class NotificationModel {
         this.notificationDateTime = notificationDateTime;
         this.appIconBase64 = appIconBase64;
         this.imageButtonDelete = imageButtonDelete;
+        this.packageName = packageName;
     }
 
     // Getters and setters
@@ -88,5 +90,13 @@ public class NotificationModel {
 
     public void setImageButtonDelete(String imageButtonDelete) {
         this.imageButtonDelete = imageButtonDelete;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 }

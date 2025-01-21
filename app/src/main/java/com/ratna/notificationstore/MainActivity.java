@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -43,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,16 +54,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final String PREFS_NAME = "NotificationStorePrefs";
     private static final String DEVICE_ID_KEY = "DeviceID";
-
     private Context context;
-
     private NotificationAdapter notificationAdapter;
     private static List<NotificationModel> notificationModels = new ArrayList<>();
     public static List<NotificationModel> getNotificationModels() {
         return notificationModels;
     }
     private String deviceId;
-    TextView textViewNothingFound;
+    private TextView textViewNothingFound;
     private ImageView imageViewSetting, imageViewSearch, imageViewFilter, imageViewMenu;
     private SearchView searchView;
     private int thumbOnColor, thumbOffColor, trackOnColor, trackOffColor;
@@ -94,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imageViewMenu.setOnClickListener(v -> {
-            Context wrapper = new ContextThemeWrapper(MainActivity.this, R.style.CustomPopupMenu);
-            PopupMenu popupMenu = new PopupMenu(wrapper, imageViewMenu);
+            PopupMenu popupMenu = new PopupMenu(MainActivity.this, imageViewMenu);
 
             for (NotificationModel model : notificationModels) {
                 if (model != null && model.getAppName() != null && !TextUtils.isEmpty(model.getAppName())) {
@@ -113,8 +111,22 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             });
+
+            try {
+                Field popupField = PopupMenu.class.getDeclaredField("mPopup");
+                popupField.setAccessible(true);
+                Object popupHelper = popupField.get(popupMenu);
+                if (popupHelper instanceof ListPopupWindow) {
+                    ListPopupWindow popupWindow = (ListPopupWindow) popupHelper;
+                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.color.background));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             popupMenu.show();
         });
+
 
         imageViewFilter.setOnClickListener(v -> {
             LayoutInflater inflater = LayoutInflater.from(this);
@@ -153,9 +165,7 @@ public class MainActivity extends AppCompatActivity {
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appNames);
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             appSpinner.setAdapter(spinnerAdapter);
-
             Log.d(TAG, "App Names: " + appNames);
-
             appSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -212,34 +222,26 @@ public class MainActivity extends AppCompatActivity {
             textViewFromCalender.setOnClickListener(v1 -> showDatePickerWithTime(textViewFromCalender));
             textViewUntilCalender.setOnClickListener(v1 -> showDatePickerWithTime(textViewUntilCalender));
 
-            AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .create();
+            AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setCancelable(false).create();
 
             alertDialog.setOnShowListener(dialogInterface -> {
                 Window window = alertDialog.getWindow();
                 if (window != null) {
                     window.setLayout((int) (getResources().getDisplayMetrics().widthPixels * 0.90), WindowManager.LayoutParams.WRAP_CONTENT);
-
                     GradientDrawable drawable = new GradientDrawable();
                     drawable.setShape(GradientDrawable.RECTANGLE);
                     drawable.setCornerRadius(60);
                     drawable.setColor(Color.WHITE);
-
                     window.setBackgroundDrawable(drawable);
                 }
             });
 
             textViewCancel.setOnClickListener(v1 -> alertDialog.dismiss());
-
             textViewAccept.setOnClickListener(v1 -> {
                 String selectedApp = appSpinner.getSelectedItem().toString();
                 String startDate = textViewFromCalender.getText().toString();
                 String endDate = textViewUntilCalender.getText().toString();
-
                 Log.d(TAG, "Filter accepted: App - " + selectedApp + ", Start Date - " + startDate + ", End Date - " + endDate);
-
                 filterNotificationsByAppAndDate(selectedApp, startDate, endDate);
                 alertDialog.dismiss();
             });
@@ -275,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.notificationRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         notificationModels = new ArrayList<>();
         notificationAdapter = new NotificationAdapter(this, notificationModels);
         recyclerView.setAdapter(notificationAdapter);
@@ -308,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
         long start = Long.MIN_VALUE;
         long end = Long.MAX_VALUE;
 
-        // Parse start and end dates
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         try {
             if (!TextUtils.isEmpty(startDate)) {
@@ -337,11 +337,8 @@ public class MainActivity extends AppCompatActivity {
             if (model != null) {
                 boolean matchesApp = "All Apps".equals(selectedApp) ||
                         (model.getAppName() != null && model.getAppName().equalsIgnoreCase(selectedApp));
-
                 Log.d("Date Filter", "Notification timestamp: " + model.getTimeStamp() + ", Start date: " + startDate + ", End date: " + endDate);
-
                 boolean matchesDate = model.getTimeStamp() >= start && model.getTimeStamp() <= end;
-
                 if (matchesApp && matchesDate) {
                     filteredList.add(model);
                 }
@@ -355,16 +352,10 @@ public class MainActivity extends AppCompatActivity {
         if (show) {
             searchView.setVisibility(View.VISIBLE);
             searchView.setAlpha(0f);
-            searchView.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .start();
+            searchView.animate().alpha(1f).setDuration(300).start();
             searchView.requestFocus();
         } else {
-            searchView.animate()
-                    .alpha(0f)
-                    .setDuration(300)
-                    .withEndAction(() -> {
+            searchView.animate().alpha(0f).setDuration(300).withEndAction(() -> {
                         searchView.setVisibility(View.GONE);
                         searchView.setQuery("", false); // Reset query
                     })
@@ -395,9 +386,7 @@ public class MainActivity extends AppCompatActivity {
         List<NotificationModel> filteredList = new ArrayList<>();
         long start = Long.MIN_VALUE;
         long end = Long.MAX_VALUE;
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-
         try {
             if (!TextUtils.isEmpty(startDate)) {
                 start = dateFormat.parse(startDate).getTime();
@@ -415,9 +404,7 @@ public class MainActivity extends AppCompatActivity {
                         (model.getAppName() != null && model.getAppName().toLowerCase().contains(query.toLowerCase())) ||
                         (model.getNotificationContent() != null && model.getNotificationContent().toLowerCase().contains(query.toLowerCase())) ||
                         (model.getNotificationHeading() != null && model.getNotificationHeading().toLowerCase().contains(query.toLowerCase()));
-
                 boolean matchesDate = model.getTimeStamp() >= start && model.getTimeStamp() <= end;
-
                 if (matchesQuery && matchesDate) {
                     filteredList.add(model);
                 }
@@ -425,7 +412,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         notificationAdapter.updateData(filteredList);
-
         if (filteredList.isEmpty()) {
             textViewNothingFound.setVisibility(View.VISIBLE);
         } else {
@@ -435,21 +421,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNotificationsFromFirebase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
         databaseReference.orderByChild("timestamp").limitToLast(200).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 notificationModels.clear();
-
                 if (!snapshot.exists()) {
                     Log.d(TAG, "No notifications found for device: " + deviceId);
                     return;
                 }
-
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     NotificationModel notificationModel = dataSnapshot.getValue(NotificationModel.class);
                     if (notificationModel != null) {
@@ -457,21 +437,16 @@ public class MainActivity extends AppCompatActivity {
                         notificationModels.add(notificationModel);
                     }
                 }
-
                 List<NotificationModel> reversedList = new ArrayList<>();
                 for (int i = notificationModels.size() - 1; i >= 0; i--) {
                     reversedList.add(notificationModels.get(i));
                 }
-
                 notificationModels.clear();
                 notificationModels.addAll(reversedList);
-
                 autoDeleteOldNotifications();
-
                 notificationAdapter.notifyDataSetChanged();
                 Log.d(TAG, "Notifications loaded: " + notificationModels.size());
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Failed to load notifications: " + error.getMessage());
@@ -482,18 +457,11 @@ public class MainActivity extends AppCompatActivity {
     private void autoDeleteOldNotifications() {
         long currentTime = System.currentTimeMillis();
         long ninetyDaysInMillis = 90L * 24 * 60 * 60 * 1000;
-
         List<NotificationModel> toRemove = new ArrayList<>();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
         for (NotificationModel model : notificationModels) {
             if (model != null && model.getTimeStamp() < (currentTime - ninetyDaysInMillis)) {
                 toRemove.add(model);
-
-                // Delete from Firebase
                 if (model.getUniqueKey() != null) {
                     databaseReference.child(model.getUniqueKey()).removeValue()
                             .addOnSuccessListener(aVoid -> Log.d(TAG, "Deleted old notification: " + model.getUniqueKey()))
@@ -502,7 +470,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         notificationModels.removeAll(toRemove);
-
         if (!toRemove.isEmpty()) {
             notificationAdapter.notifyDataSetChanged();
             Log.d(TAG, "Deleted " + toRemove.size() + " old notifications from local storage.");
@@ -519,7 +486,6 @@ public class MainActivity extends AppCompatActivity {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, month1, dayOfMonth) -> {
                     showTimePicker(textView, year1, month1, dayOfMonth);
@@ -531,7 +497,6 @@ public class MainActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-
         TimePickerDialog timePickerDialog = new TimePickerDialog(this,
                 (view, hourOfDay, minuteOfHour) -> {
                     String dateTime = String.format(Locale.getDefault(),

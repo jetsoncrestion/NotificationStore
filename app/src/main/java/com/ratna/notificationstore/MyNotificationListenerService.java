@@ -1,5 +1,7 @@
 package com.ratna.notificationstore;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -16,6 +18,10 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.ratna.notificationstore.Model.NotificationModel;
 import com.google.firebase.database.DatabaseReference;
@@ -151,7 +157,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
 
         PackageManager pm = getPackageManager();
-        String appName;
+        String appName = packageName;
         String appIconBase64 = null;
 
         try {
@@ -164,10 +170,43 @@ public class MyNotificationListenerService extends NotificationListenerService {
             appName = packageName;
         }
 
-        saveNotificationToFirebase(appName, heading, text, timestamp, appIconBase64);
+        saveNotificationToFirebase(appName, heading, text, timestamp, appIconBase64, packageName);
+
+        Intent intent = pm.getLaunchIntentForPackage(packageName);
+        if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);  // Ensure it's a new task
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+            );
+            // Create a notification with a PendingIntent to open the app
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
+                    .setSmallIcon(android.R.drawable.ic_notification_overlay)  // Use appropriate icon
+                    .setContentTitle(appName)
+                    .setContentText(text)
+                    .setAutoCancel(true)  // Remove notification after it's clicked
+                    .setContentIntent(pendingIntent);  // Set the PendingIntent here
+
+            // Get the NotificationManager to issue the notification
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            notificationManager.notify((int) timestamp, builder.build());
+        }
     }
 
-    private void saveNotificationToFirebase(String appName, String heading, String text, long timestamp, String appIconBase64) {
+    private void saveNotificationToFirebase(String appName, String heading, String text, long timestamp, String appIconBase64, String packageName) {
         // Retrieve device ID
         String deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
@@ -184,6 +223,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         notification.setNotificationContent(text);
         notification.setNotificationDateTime(timestamp);
         notification.setAppIconBase64(appIconBase64);
+        notification.setPackageName(packageName);
 
         if (notificationId != null) {
             databaseReference.child(notificationId).setValue(notification)

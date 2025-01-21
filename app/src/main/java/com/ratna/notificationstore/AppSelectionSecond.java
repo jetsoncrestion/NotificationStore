@@ -10,7 +10,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -34,6 +36,8 @@ public class AppSelectionSecond extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private CardView cardView9;
+    private SearchView searchView;
+    private ImageView imageViewSearch;
     private boolean isSelectedAllEnabled = false;
 
     @Override
@@ -45,6 +49,8 @@ public class AppSelectionSecond extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
         cardView9 = findViewById(R.id.cardView9);
+        searchView = findViewById(R.id.searchView);
+        imageViewSearch = findViewById(R.id.imageViewSearch);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
@@ -63,12 +69,30 @@ public class AppSelectionSecond extends AppCompatActivity {
             saveSelectAllState(preferences, isChecked);
         });
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                appAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                appAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+
         if (isAppSelectionDone && !isRevisiting) {
             Intent intent = new Intent(AppSelectionSecond.this, MainActivity.class);
             startActivity(intent);
             finish();
             return;
         }
+
+        imageViewSearch.setOnClickListener(v -> {
+            toggleSearchView(searchView.getVisibility() != View.VISIBLE);
+        });
 
         findViewById(R.id.button).setOnClickListener(v -> {
             List<String> selectedAppsList = appAdapter.getSelectedApps();
@@ -85,6 +109,20 @@ public class AppSelectionSecond extends AppCompatActivity {
             finish();
         });
         loadApps();
+    }
+
+    private void toggleSearchView(boolean show) {
+        if (show) {
+            searchView.setVisibility(View.VISIBLE);
+            searchView.setAlpha(0f);
+            searchView.animate().alpha(1f).setDuration(300).start();
+            searchView.requestFocus();
+        } else {
+            searchView.animate().alpha(0f).setDuration(300).withEndAction(() -> {
+                searchView.setVisibility(View.GONE);
+                searchView.setQuery("", false);
+            }).start();
+        }
     }
 
     private void updateSwitchColors(Switch toggleSwitch, boolean isChecked) {

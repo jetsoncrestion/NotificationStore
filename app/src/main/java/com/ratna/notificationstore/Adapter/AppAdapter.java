@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -16,15 +17,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ratna.notificationstore.Model.AppModel;
 import com.ratna.notificationstore.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     private final List<AppModel> appModels;
+    private final List<AppModel> appModelsFull;
     private final Context context;
 
     public AppAdapter(List<AppModel> appModels, Context context) {
         this.appModels = appModels;
+        this.appModelsFull = new ArrayList<>(appModels);
         this.context = context;
     }
 
@@ -61,6 +65,37 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         // Return package names of selected apps
         return appModels.stream().filter(AppModel::isSelected).map(AppModel::getPackageName).collect(Collectors.toList());
     }
+
+    public Filter getFilter() {
+        return appFilter;
+    }
+
+    private final Filter appFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<AppModel> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(appModelsFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (AppModel app : appModelsFull) {
+                    if (app.getAppName().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(app);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            appModels.clear();
+            appModels.addAll((List<AppModel>) results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView appName;

@@ -35,10 +35,9 @@
         <item name="android:textColor">#000000</item> <!-- Set the desired button text color -->
     </style>
 
-
-
     <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@color/background</item>
         <item name="android:textColor">@color/black</item>
+        <item name="backgroundColor">@color/background</item>
     </style>
 </resources>

@@ -1,6 +1,7 @@
 package com.ratna.notificationstore.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,32 +55,89 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.appName.setText(notificationModel.getAppName());
         holder.notificationContent.setText(notificationModel.getNotificationContent());
 
-        long timestamp = notificationModel.getNotificationDateTime();
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
-        holder.notificationDateTime.setText(formattedDate);
+            long timestamp = notificationModel.getNotificationDateTime();
+            String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
+            holder.notificationDateTime.setText(formattedDate);
 
-        String appIconBase64 = notificationModel.getAppIconBase64();
-        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
-            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
-            if (bitmap != null) {
-                holder.appIcon.setImageBitmap(bitmap);
+            String appIconBase64 = notificationModel.getAppIconBase64();
+            if (appIconBase64 != null && !appIconBase64.isEmpty()) {
+                Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
+                holder.appIcon.setImageBitmap(bitmap != null ? bitmap : getFallbackIcon());
             } else {
-                Log.e("NotificationAdapter", "Failed to decode app icon Base64. Using fallback icon.");
                 holder.appIcon.setImageResource(R.drawable.baseline_android_24);
             }
-        } else {
-            Log.e("NotificationAdapter", "App icon Base64 is null or empty. Using fallback icon.");
-            holder.appIcon.setImageResource(R.drawable.baseline_android_24);
+
+            holder.imageButtonDelete.setOnClickListener(v -> deleteNotification(position));
+            holder.itemView.setOnClickListener(v -> {
+                String packageName = notificationModel.getPackageName();
+                if (packageName != null && !packageName.isEmpty()){
+                    openApplication(packageName);
+                } else {
+                    Toast.makeText(context, "Package name is missing", Toast.LENGTH_SHORT).show();
+                    Log.e("NotificationAdapter", "Missing package name for notification at position: " + position);
+                }
+            });
+            holder.itemView.setOnLongClickListener(v -> {
+                showNotificationDetailsDialog(notificationModel);
+                return true;
+            });
         }
 
-        holder.imageButtonDelete.setOnClickListener(v -> {
-            deleteNotification(position);
-        });
 
-        holder.itemView.setOnClickListener(v -> {
-            showNotificationDetailsDialog(notificationModel);
-        });
-    }
+
+//
+//        long timestamp = notificationModel.getNotificationDateTime();
+//        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
+//        holder.notificationDateTime.setText(formattedDate);
+
+        // String appIconBase64 = notificationModel.getAppIconBase64();
+//        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
+//            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
+//            if (bitmap != null) {
+//                holder.appIcon.setImageBitmap(bitmap);
+//            } else {
+//                Log.e("NotificationAdapter", "Failed to decode app icon Base64. Using fallback icon.");
+//                holder.appIcon.setImageResource(R.drawable.baseline_android_24);
+//            }
+//        } else {
+//            Log.e("NotificationAdapter", "App icon Base64 is null or empty. Using fallback icon.");
+//            holder.appIcon.setImageResource(R.drawable.baseline_android_24);
+//        }
+//
+//        holder.imageButtonDelete.setOnClickListener(v -> {
+//            deleteNotification(position);
+//        });
+//
+//        holder.itemView.setOnClickListener(v -> {
+//            showNotificationDetailsDialog(notificationModel);
+//        });
+
+    private void openApplication (String packageName) {
+//        if (packageName == null || packageName.isEmpty()) {
+//            Toast.makeText(context, "Application not found. Package name is missing.", Toast.LENGTH_SHORT).show();
+//            Log.e("NotificationAdapter", "Invalid package name: " + packageName);
+//            return;
+//        }
+
+        try {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "Unable to open application", Toast.LENGTH_SHORT).show();
+                Log.e("NotificationAdapter", "No launch intent available for package: " + packageName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error opening application", Toast.LENGTH_SHORT).show();
+            Log.e("NotificationAdapter", "Exception while opening package: " + packageName, e);
+        }
+        }
+
+        private Bitmap getFallbackIcon() {
+            return BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_android_24);
+        }
 
     private void deleteNotification(int position) {
         if (notificationModels == null || notificationModels.isEmpty() || position < 0 || position >= notificationModels.size()) {
