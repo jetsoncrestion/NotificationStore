@@ -244,8 +244,6 @@ public class Setting extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("delete_option", "never_delete");
         editor.apply();
-
-        //Toast.makeText(this, "Auto-delete is disabled. Notifications will not be deleted automatically.", Toast.LENGTH_SHORT).show();
     }
 
     private void performDeleteDailyLogic() {
@@ -273,9 +271,14 @@ public class Setting extends AppCompatActivity {
     }
 
     private void deleteOldNotifications(long timeThreshold) {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
+        DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
 
-        deletedNotificationsRef.get().addOnCompleteListener(task -> {
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("deleted_notifications");
+
+        notificationsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (DataSnapshot snapshot : task.getResult().getChildren()) {
                     DeleteNotificationModel model = snapshot.getValue(DeleteNotificationModel.class);
@@ -285,7 +288,15 @@ public class Setting extends AppCompatActivity {
                         long timeDifference = currentTime - notificationTime;
 
                         if (timeDifference > timeThreshold) {
-                            deletedNotificationsRef.child(snapshot.getKey()).removeValue();
+                            // Move the notification to deleted_notifications
+                            String notificationKey = snapshot.getKey();
+                            deletedNotificationsRef.child(notificationKey).setValue(model)
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Remove the notification from the original node
+                                        notificationsRef.child(notificationKey).removeValue();
+                                    }).addOnFailureListener(e -> {
+                                        Toast.makeText(this, "Failed to move notification", Toast.LENGTH_SHORT).show();
+                                    });
                         }
                     }
                 }

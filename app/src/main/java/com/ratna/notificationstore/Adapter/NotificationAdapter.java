@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,70 +56,45 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.appName.setText(notificationModel.getAppName());
         holder.notificationContent.setText(notificationModel.getNotificationContent());
 
-            long timestamp = notificationModel.getNotificationDateTime();
-            String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
-            holder.notificationDateTime.setText(formattedDate);
+        long timestamp = notificationModel.getNotificationDateTime();
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
+        holder.notificationDateTime.setText(formattedDate);
 
-            String appIconBase64 = notificationModel.getAppIconBase64();
-            if (appIconBase64 != null && !appIconBase64.isEmpty()) {
-                Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
-                holder.appIcon.setImageBitmap(bitmap != null ? bitmap : getFallbackIcon());
-            } else {
-                holder.appIcon.setImageResource(R.drawable.baseline_android_24);
-            }
-
-            holder.imageButtonDelete.setOnClickListener(v -> deleteNotification(position));
-            holder.itemView.setOnClickListener(v -> {
-                String packageName = notificationModel.getPackageName();
-                if (packageName != null && !packageName.isEmpty()){
-                    openApplication(packageName);
-                } else {
-                    Toast.makeText(context, "Package name is missing", Toast.LENGTH_SHORT).show();
-                    Log.e("NotificationAdapter", "Missing package name for notification at position: " + position);
-                }
-            });
-            holder.itemView.setOnLongClickListener(v -> {
-                showNotificationDetailsDialog(notificationModel);
-                return true;
-            });
+        String appIconBase64 = notificationModel.getAppIconBase64();
+        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
+            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
+            holder.appIcon.setImageBitmap(bitmap != null ? bitmap : getFallbackIcon());
+        } else {
+            holder.appIcon.setImageResource(R.drawable.baseline_android_24);
         }
 
+        holder.imageButtonDelete.setOnClickListener(v -> deleteNotification(position));
+        holder.itemView.setOnClickListener(v -> {
+            String packageName = notificationModel.getPackageName();
+            if (packageName != null && !packageName.isEmpty()) {
+                openApplication(packageName);
+            } else {
+                Toast.makeText(context, "Package name is missing", Toast.LENGTH_SHORT).show();
+                Log.e("NotificationAdapter", "Missing package name for notification at position: " + position);
+            }
+        });
 
-
-//
-//        long timestamp = notificationModel.getNotificationDateTime();
-//        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
-//        holder.notificationDateTime.setText(formattedDate);
-
-        // String appIconBase64 = notificationModel.getAppIconBase64();
-//        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
-//            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
-//            if (bitmap != null) {
-//                holder.appIcon.setImageBitmap(bitmap);
-//            } else {
-//                Log.e("NotificationAdapter", "Failed to decode app icon Base64. Using fallback icon.");
-//                holder.appIcon.setImageResource(R.drawable.baseline_android_24);
-//            }
-//        } else {
-//            Log.e("NotificationAdapter", "App icon Base64 is null or empty. Using fallback icon.");
-//            holder.appIcon.setImageResource(R.drawable.baseline_android_24);
-//        }
-//
-//        holder.imageButtonDelete.setOnClickListener(v -> {
-//            deleteNotification(position);
-//        });
-//
 //        holder.itemView.setOnClickListener(v -> {
-//            showNotificationDetailsDialog(notificationModel);
+//            String deepLink = notificationModel.getDeepLink(); // Get the deep link from the model
+//            if (deepLink != null && !deepLink.isEmpty()) {
+//                openDeepLink(deepLink);
+//            } else {
+//                Toast.makeText(context, "Deep link not available for this notification", Toast.LENGTH_SHORT).show();
+//            }
 //        });
 
-    private void openApplication (String packageName) {
-//        if (packageName == null || packageName.isEmpty()) {
-//            Toast.makeText(context, "Application not found. Package name is missing.", Toast.LENGTH_SHORT).show();
-//            Log.e("NotificationAdapter", "Invalid package name: " + packageName);
-//            return;
-//        }
+        holder.itemView.setOnLongClickListener(v -> {
+            showNotificationDetailsDialog(notificationModel);
+            return true;
+        });
+    }
 
+    private void openApplication(String packageName) {
         try {
             Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
             if (intent != null) {
@@ -133,11 +109,24 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             Toast.makeText(context, "Error opening application", Toast.LENGTH_SHORT).show();
             Log.e("NotificationAdapter", "Exception while opening package: " + packageName, e);
         }
-        }
+    }
 
-        private Bitmap getFallbackIcon() {
-            return BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_android_24);
+    private void openDeepLink(String deepLink) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(deepLink)); // Parse the deep link URI
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Unable to open the specific section", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private Bitmap getFallbackIcon() {
+        return BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_android_24);
+    }
 
     private void deleteNotification(int position) {
         if (notificationModels == null || notificationModels.isEmpty() || position < 0 || position >= notificationModels.size()) {
@@ -165,41 +154,30 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notifyItemRemoved(position);
 //        notifyItemRangeChanged(position, notificationModels.size());
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
 
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications")
-                .child(uniqueKey);
-        deletedNotificationsRef.setValue(model)
-                .addOnSuccessListener(aVoid -> {
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications").child(uniqueKey);
+        deletedNotificationsRef.setValue(model).addOnSuccessListener(aVoid -> {
 
-                    databaseReference.child(uniqueKey).removeValue()
-                            .addOnSuccessListener(aVoid1 -> {
-                                Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
-                               // Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
-                                Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+            databaseReference.child(uniqueKey).removeValue().addOnSuccessListener(aVoid1 -> {
+                Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
+                // Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> {
+                Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
+                Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
 
-                                notificationModels.add(position, model);
-                                notifyItemInserted(position);
+                notificationModels.add(position, model);
+                notifyItemInserted(position);
 //                                notifyItemRangeChanged(position, notificationModels.size());
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("NotificationAdapter", "Failed to save notification to deleted_notifications: " + e.getMessage());
-                    Toast.makeText(context, "Failed to save deleted notification", Toast.LENGTH_SHORT).show();
+            });
+        }).addOnFailureListener(e -> {
+            Log.e("NotificationAdapter", "Failed to save notification to deleted_notifications: " + e.getMessage());
+            Toast.makeText(context, "Failed to save deleted notification", Toast.LENGTH_SHORT).show();
 
-                    notificationModels.add(position, model);
-                    notifyItemInserted(position);
-                    notifyItemRangeChanged(position, notificationModels.size());
-                });
+            notificationModels.add(position, model);
+            notifyItemInserted(position);
+            notifyItemRangeChanged(position, notificationModels.size());
+        });
     }
 
     private String getDeviceId(Context context) {
@@ -225,8 +203,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notificationContent.setText(model.getNotificationContent());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        AlertDialog dialog = builder.setView(dialogView)
-                .create();
+        AlertDialog dialog = builder.setView(dialogView).create();
 
         dialog.setOnShowListener(dialogInterface -> {
             Window window = dialog.getWindow();

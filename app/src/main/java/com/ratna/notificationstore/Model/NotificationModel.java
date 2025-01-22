@@ -10,6 +10,7 @@ public class NotificationModel {
     private String appIconBase64;
     private String imageButtonDelete;
     private String packageName;
+    private String deepLink;
 
     // Default constructor
     public NotificationModel() {
@@ -17,7 +18,7 @@ public class NotificationModel {
     }
 
     // Constructor with parameters
-    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete, String packageName) {
+    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete, String packageName, String deepLink) {
         this.uniqueKey = uniqueKey;
         this.appName = appName;
         this.timeStamp = timeStamp == 0 ? System.currentTimeMillis() : timeStamp;
@@ -27,6 +28,7 @@ public class NotificationModel {
         this.appIconBase64 = appIconBase64;
         this.imageButtonDelete = imageButtonDelete;
         this.packageName = packageName;
+        this.deepLink = deepLink;
     }
 
     // Getters and setters
@@ -98,5 +100,11 @@ public class NotificationModel {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
+    }
+    public String getDeepLink() {
+        return deepLink;
+    }
+    public void setDeepLink(String deepLink) {
+        this.deepLink = deepLink;
     }
 }
