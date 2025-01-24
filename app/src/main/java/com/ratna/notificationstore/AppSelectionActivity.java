@@ -184,7 +184,6 @@ public class AppSelectionActivity extends AppCompatActivity {
         appAdapter.notifyDataSetChanged();
     }
 
-
     private void saveSelectAllState(SharedPreferences preferences, boolean isChecked) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("isSelectAllEnabled", isChecked);
