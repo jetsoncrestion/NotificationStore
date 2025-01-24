@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         return notificationModels;
     }
     private String deviceId;
-    private TextView textViewNothingFound;
+   // private TextView textViewNothingFound;
     private ImageView imageViewSetting, imageViewSearch, imageViewFilter, imageViewMenu;
     private SearchView searchView;
     private int thumbOnColor, thumbOffColor, trackOnColor, trackOffColor;
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         imageViewSetting = findViewById(R.id.imageViewSetting);
         searchView = findViewById(R.id.searchView);
         imageViewSearch = findViewById(R.id.imageViewSearch);
-        textViewNothingFound = findViewById(R.id.textViewNothingFound);
+//        textViewNothingFound = findViewById(R.id.textViewNothingFound);
         imageViewFilter = findViewById(R.id.imageViewFilter);
         imageViewMenu = findViewById(R.id.imageViewMenu);
 
@@ -370,17 +370,17 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_update_selection) {
-            Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
-            intent.putExtra("isRevisiting", true);
-            startActivity(intent);
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        if (item.getItemId() == R.id.action_update_selection) {
+//            Intent intent = new Intent(MainActivity.this, AppSelectionActivity.class);
+//            intent.putExtra("isRevisiting", true);
+//            startActivity(intent);
+//            finish();
+//            return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     private void filterNotifications(String query, String startDate, String endDate) {
         List<NotificationModel> filteredList = new ArrayList<>();
@@ -412,11 +412,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         notificationAdapter.updateData(filteredList);
-        if (filteredList.isEmpty()) {
-            textViewNothingFound.setVisibility(View.VISIBLE);
-        } else {
-            textViewNothingFound.setVisibility(View.GONE);
-        }
+//        if (filteredList.isEmpty()) {
+//            textViewNothingFound.setVisibility(View.VISIBLE);
+//        } else {
+//            textViewNothingFound.setVisibility(View.GONE);
+//        }
         Log.d(TAG, "Filtered notifications count: " + filteredList.size());
     }
 

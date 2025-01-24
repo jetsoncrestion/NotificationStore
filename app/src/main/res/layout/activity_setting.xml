@@ -365,13 +365,13 @@
                         android:id="@+id/textViewDeleteNotification"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_12sdp"
-                        android:layout_marginTop="@dimen/_15sdp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginStart="@dimen/_10sdp"
                         android:fontFamily="@font/roboto"
-                        android:text="View Deleted Notification"
+                        android:text="Recently Deleted Notification"
                         android:textColor="@color/special"
                         android:textSize="@dimen/_10ssp"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imageView4"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
@@ -384,6 +384,16 @@
                         android:textSize="@dimen/_8ssp"
                         app:layout_constraintStart_toStartOf="@+id/textViewDeleteNotification"
                         app:layout_constraintTop_toBottomOf="@+id/textViewDeleteNotification" />
+
+                    <ImageView
+                        android:id="@+id/imageView4"
+                        android:layout_width="@dimen/_20sdp"
+                        android:layout_height="@dimen/_20sdp"
+                        android:layout_marginStart="@dimen/_8sdp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/delete_copy" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 

@@ -79,15 +79,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             }
         });
 
-//        holder.itemView.setOnClickListener(v -> {
-//            String deepLink = notificationModel.getDeepLink(); // Get the deep link from the model
-//            if (deepLink != null && !deepLink.isEmpty()) {
-//                openDeepLink(deepLink);
-//            } else {
-//                Toast.makeText(context, "Deep link not available for this notification", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
         holder.itemView.setOnLongClickListener(v -> {
             showNotificationDetailsDialog(notificationModel);
             return true;

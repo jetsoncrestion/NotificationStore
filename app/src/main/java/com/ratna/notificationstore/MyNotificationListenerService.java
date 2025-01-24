@@ -42,7 +42,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         Bundle extras = sbn.getNotification().extras;
         String title = sbn.getNotification().extras.getString("android.title");
         String text = sbn.getNotification().extras.getString("android.text");
-        String subject = sbn.getNotification().extras.getString("android.subText");
+       String subject = sbn.getNotification().extras.getString("android.subText");
         String bigText = sbn.getNotification().extras.getString("android.bigText");
 
         for (String key : extras.keySet()) {
@@ -56,9 +56,27 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
 
         if (packageName.equals("com.whatsapp")) {
-            String lineMessages = extras.getString("android.textLines");
-            if (!TextUtils.isEmpty(lineMessages)) {
-                text = lineMessages;
+            String textLines = extras.getString("android.textLines");
+            if (!TextUtils.isEmpty(textLines)) {
+                text = textLines; // Update text to use textLines if available
+            }
+
+            if (text != null && text.contains("image") || text.contains("photo")) {
+                String notificationKey = packageName + "|" + title + "|" + text;
+
+                synchronized (recentNotifications) {
+                    if (!recentNotifications.add(notificationKey)) {
+                        Log.d(TAG, "Duplicate WhatsApp image notification detected: " + notificationKey + ", skipping.");
+                        return; // Skip processing duplicate notifications
+                    }
+
+                    // Remove key after 10 seconds to allow fresh notifications later
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        synchronized (recentNotifications) {
+                            recentNotifications.remove(notificationKey);
+                        }
+                    }, 10000); // Adjust delay as needed
+                }
             }
         }
 
@@ -236,6 +254,19 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
     private void handleMultiMessageNotification(String packageName, String messageSummary) {
         Log.d(TAG, "Processing multi-message summary: " + messageSummary);
+    }
+
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        if (bitmap == null) {
+            Log.e(TAG, "Bitmap is null, unable to convert to Base64.");
+            return null;  // Handle null case gracefully
+        }
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
     private String drawableToBase64(Drawable drawable) {

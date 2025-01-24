@@ -25,14 +25,14 @@
                 android:id="@+id/noDeletedItemsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_4sdp"
                 android:fontFamily="@font/poppins_regular"
                 android:text="Deleted Notifications"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_22sdp"
-                android:layout_marginTop="@dimen/_4sdp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewMenu"
                 app:layout_constraintStart_toEndOf="@+id/imageBack"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,6 +45,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/noDeletedItemsTextView"
                 app:srcCompat="@drawable/back" />
+
+            <ImageView
+                android:id="@+id/imageViewMenu"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/menuvertical___copy" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

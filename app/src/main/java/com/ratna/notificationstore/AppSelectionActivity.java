@@ -63,6 +63,11 @@ public class AppSelectionActivity extends AppCompatActivity {
         updateSwitchColors(toggleSwitch, isSelectAllEnabled);
 
         toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (appAdapter == null) {
+                Toast.makeText(this, "Please wait for the apps to load.", Toast.LENGTH_SHORT).show();
+                toggleSwitch.setChecked(!isChecked); // Revert the state
+                return;
+            }
             isSelectAllEnabled = isChecked;
             updateSwitchColors(toggleSwitch, isChecked); // Update colors on toggle
             updateSelectAllState(isChecked);
@@ -170,11 +175,15 @@ public class AppSelectionActivity extends AppCompatActivity {
     }
 
     private void updateSelectAllState(boolean isChecked) {
+        if (appAdapter == null) {
+            return; // Do nothing if appAdapter is not initialized
+        }
         for (AppModel appModel : appModels) {
             appModel.setSelected(isChecked);
         }
         appAdapter.notifyDataSetChanged();
     }
+
 
     private void saveSelectAllState(SharedPreferences preferences, boolean isChecked) {
         SharedPreferences.Editor editor = preferences.edit();

@@ -111,20 +111,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchView" />
 
-    <TextView
-        android:id="@+id/textViewNothingFound"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="There are no notification that match wtih your selected criteria"
-        android:textAlignment="center"
-        android:textColor="@color/special"
-        android:textSize="@dimen/_12ssp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:id="@+id/textViewNothingFound"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fontFamily="@font/roboto"-->
+<!--        android:text="There are no notification that match wtih your selected criteria"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textColor="@color/special"-->
+<!--        android:textSize="@dimen/_12ssp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:visibility="gone"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

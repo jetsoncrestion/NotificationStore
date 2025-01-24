@@ -2,12 +2,14 @@ package com.ratna.notificationstore;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +34,7 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
     private DeleteNotificationAdapter notificationAdapter;
     private List<DeleteNotificationModel> deletedNotificationModels;
     private String deviceId;
-    private ImageView imageBack;
+    private ImageView imageBack, imageViewMenuActionBar;
     private int selectedPosition = -1;
 
     @Override
@@ -41,6 +43,7 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
         setContentView(R.layout.activity_delete_notification);
 
         imageBack = findViewById(R.id.imageBack);
+        imageViewMenuActionBar = findViewById(R.id.imageViewMenu);
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
 
         recyclerView = findViewById(R.id.deleteNotificationRecyclerView);
@@ -59,6 +62,24 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
                 }
                 return false;
             }
+        });
+
+        imageViewMenuActionBar.setOnClickListener(v -> {
+PopupMenu popupMenu = new PopupMenu(DeleteNotificationActivity.this, imageViewMenuActionBar);
+popupMenu.inflate(R.menu.main_menu);
+Menu menu = popupMenu.getMenu();
+
+//MenuItem deleteAllItem = menu.add(Menu.NONE, R.id.action_delete_all, Menu.NONE, "");
+
+popupMenu.setOnMenuItemClickListener(item -> {
+    int itemId = item.getItemId();
+    if (itemId == R.id.action_delete_all) {
+        deleteAllNotifications();
+        return true;
+    }
+    return false;
+});
+popupMenu.show();
         });
 
         autoDeleteOldNotifications();
@@ -204,6 +225,22 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
 
             deletedNotificationModels.add(position, model);
             notificationAdapter.notifyItemInserted(position);
+        });
+    }
+
+    public void deleteAllNotifications(){
+        DatabaseReference deleteNotificationsRef = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("deleted_notifications");
+
+        deleteNotificationsRef.removeValue().addOnSuccessListener(aVoid ->{
+            Toast.makeText(this, "All notifications deleted", Toast.LENGTH_SHORT).show();
+            deletedNotificationModels.clear();;
+            notificationAdapter.notifyDataSetChanged();
+        }).addOnFailureListener(e -> {
+            Log.e("DeleteAll", "Failed to delete all notifications: " + e.getMessage());
+            Toast.makeText(this, "Failed to delete notifications", Toast.LENGTH_SHORT).show();
         });
     }
 }

@@ -31,7 +31,7 @@ public class Setting extends AppCompatActivity {
     private Switch toggleSwitch, toggleSwitchSecond;
     private String deviceId;
     private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8, cardViewTerms, cardViewPrivacy;
-//private TextView textView4;
+    //private TextView textView4;
     private int thumbOnColor;
     private int thumbOffColor;
     private int trackOnColor;
@@ -142,10 +142,7 @@ public class Setting extends AppCompatActivity {
         });
 
         cardView7.setOnClickListener(v -> {
-            new AlertDialog.Builder(Setting.this, R.style.AlertDialogCustom)
-                    .setTitle("Delete All Notifications")
-                    .setMessage("Are you sure you want to delete all notifications?")
-                    .setPositiveButton("Yes, Delete All", (dialog, which) -> {
+            new AlertDialog.Builder(Setting.this, R.style.AlertDialogCustom).setTitle("Delete All Notifications").setMessage("Are you sure you want to delete all notifications?").setPositiveButton("Yes, Delete All", (dialog, which) -> {
                 deleteAllNotifications();
                 Toast.makeText(Setting.this, "All notifications deleted", Toast.LENGTH_SHORT).show();
             }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
@@ -189,9 +186,7 @@ public class Setting extends AppCompatActivity {
                 break;
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .create();
+        AlertDialog dialog = new AlertDialog.Builder(this).setView(dialogView).create();
 
         dialog.setOnShowListener(dialogInterface -> {
             Window window = dialog.getWindow();
@@ -232,7 +227,7 @@ public class Setting extends AppCompatActivity {
             editor.putString("delete_option", selectedOption);
             editor.apply();
 
-           // Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
@@ -273,10 +268,7 @@ public class Setting extends AppCompatActivity {
     private void deleteOldNotifications(long timeThreshold) {
         DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
 
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
 
         notificationsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -290,13 +282,12 @@ public class Setting extends AppCompatActivity {
                         if (timeDifference > timeThreshold) {
                             // Move the notification to deleted_notifications
                             String notificationKey = snapshot.getKey();
-                            deletedNotificationsRef.child(notificationKey).setValue(model)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Remove the notification from the original node
-                                        notificationsRef.child(notificationKey).removeValue();
-                                    }).addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to move notification", Toast.LENGTH_SHORT).show();
-                                    });
+                            deletedNotificationsRef.child(notificationKey).setValue(model).addOnSuccessListener(aVoid -> {
+                                // Remove the notification from the original node
+                                notificationsRef.child(notificationKey).removeValue();
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to move notification", Toast.LENGTH_SHORT).show();
+                            });
                         }
                     }
                 }
@@ -307,12 +298,28 @@ public class Setting extends AppCompatActivity {
     }
 
     private void deleteAllNotifications() {
+        DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
         DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
 
-        deletedNotificationsRef.removeValue().addOnSuccessListener(aVoid -> {
-            Toast.makeText(this, "All deleted notifications have been cleared", Toast.LENGTH_SHORT).show();
+        notificationsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                    DeleteNotificationModel model = snapshot.getValue(DeleteNotificationModel.class);
+                    if (model != null) {
+                        String notificationKey = snapshot.getKey();
+                        // Copy to deleted_notifications node
+                        deletedNotificationsRef.child(notificationKey).setValue(model).addOnSuccessListener(aVoid -> {
+                            // Remove from notifications node after successfully copying
+                            notificationsRef.child(notificationKey).removeValue().addOnFailureListener(e -> Toast.makeText(this, "Failed to delete notification: " + notificationKey, Toast.LENGTH_SHORT).show());
+                        }).addOnFailureListener(e -> Toast.makeText(this, "Failed to move notification: " + notificationKey, Toast.LENGTH_SHORT).show());
+                    }
+                }
+                Toast.makeText(this, "All notifications moved to Recently Deleted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Failed to retrieve notifications for deletion", Toast.LENGTH_SHORT).show();
+            }
         }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Failed to delete all notifications", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to delete notifications", Toast.LENGTH_SHORT).show();
         });
     }
 
