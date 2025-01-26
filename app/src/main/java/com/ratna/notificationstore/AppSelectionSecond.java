@@ -63,6 +63,12 @@ public class AppSelectionSecond extends AppCompatActivity {
         updateSwitchColors(toggleSwitch, isSelectedAllEnabled);
 
         toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (appAdapter == null) {
+                Toast.makeText(this, "Please wait for the apps to load.", Toast.LENGTH_SHORT).show();
+                toggleSwitch.setChecked(!isChecked); // Revert the state
+                return;
+            }
+
             isSelectedAllEnabled = isChecked;
             updateSwitchColors(toggleSwitch, isChecked); // Update colors on toggle
             updateSelectAllState(isChecked);
@@ -178,6 +184,9 @@ public class AppSelectionSecond extends AppCompatActivity {
     }
 
     private void updateSelectAllState(boolean isChecked) {
+        if (appAdapter == null) {
+            return; // Do nothing if appAdapter is not initialized
+        }
         for (AppModel appModel : appModels) {
             appModel.setSelected(isChecked);
         }
@@ -194,19 +203,26 @@ public class AppSelectionSecond extends AppCompatActivity {
         @Override
         protected HashSet<String> doInBackground(Void... voids) {
             SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-            HashSet<String> selectedApps = (HashSet<String>) preferences.getStringSet("selectedApps", new HashSet<>());
+            SharedPreferences.Editor editor = preferences.edit();
+            HashSet<String> selectedApps = (HashSet<String>) preferences.getStringSet("selectedApps", null);
 
-            selectedApps.add("com.facebook.katana"); //Facebook
-            selectedApps.add("com.google.android.apps.messaging"); //default phone message app
-            selectedApps.add("com.android.dialer"); //default phone dialer app
-            selectedApps.add("com.instagram.android"); //Instagram
-            selectedApps.add("com.whatsapp"); //WhatsApp
-            selectedApps.add("np.com.nepalipatro"); //NepaliPatro
-            selectedApps.add("com.twitter.android"); //Twitter
-            selectedApps.add("com.linkedin.android"); //LinkedIn
-            selectedApps.add("com.android.chrome"); //Chrome
-            selectedApps.add("com.google.android.googlequicksearchbox"); //Google
-            selectedApps.add("com.facebook.orca"); //Messenger
+            if (selectedApps == null){
+                selectedApps = new HashSet<>();
+                selectedApps.add("com.facebook.katana"); //Facebook
+                selectedApps.add("com.google.android.apps.messaging"); //default phone message app
+                selectedApps.add("com.android.dialer"); //default phone dialer app
+                selectedApps.add("com.instagram.android"); //Instagram
+                selectedApps.add("com.whatsapp"); //WhatsApp
+                selectedApps.add("np.com.nepalipatro"); //NepaliPatro
+                selectedApps.add("com.twitter.android"); //Twitter
+                selectedApps.add("com.linkedin.android"); //LinkedIn
+                selectedApps.add("com.android.chrome"); //Chrome
+                selectedApps.add("com.google.android.googlequicksearchbox"); //Google
+                selectedApps.add("com.facebook.orca"); //Messenger
+
+                editor.putStringSet("selectedApps", selectedApps);
+                editor.apply();
+            }
 
             return selectedApps;
         }

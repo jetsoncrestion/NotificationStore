@@ -11,8 +11,8 @@ android {
         applicationId = "com.ratna.notificationstore"
         minSdk = 28
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.5"
+        versionCode = 6
+        versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,4 +52,5 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation ("com.squareup.okhttp3:okhttp:3.9.1")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.android.play:app-update:2.1.0")
 }

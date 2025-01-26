@@ -102,19 +102,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
     }
 
-    private void openDeepLink(String deepLink) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(deepLink)); // Parse the deep link URI
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(context, "Unable to open the specific section", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
     private Bitmap getFallbackIcon() {
         return BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_android_24);
     }

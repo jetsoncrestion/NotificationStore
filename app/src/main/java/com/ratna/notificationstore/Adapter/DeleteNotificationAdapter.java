@@ -43,19 +43,21 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull DeleteNotificationAdapter.ViewHolder holder, int position) {
         DeleteNotificationModel model = deleteNotificationModels.get(position);
+        holder.notificationHeading.setText(model.getNotificationHeading());
         holder.appName.setText(model.getAppName());
         holder.notificationContent.setText(model.getNotificationContent());
 
         long timestamp = model.getNotificationDateTime();
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(timestamp));
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date(timestamp));
         holder.notificationDateTime.setText(formattedDate);
 
         String appIconBase64 = model.getAppIconBase64();
-        Bitmap appIcon = decodeBase64ToBitmap(appIconBase64);
-        if (appIcon != null) {
-            holder.appIcon.setImageBitmap(appIcon);
+        //Bitmap appIcon = decodeBase64ToBitmap(appIconBase64);
+        if (appIconBase64 != null && !appIconBase64.isEmpty()) {
+            Bitmap bitmap = decodeBase64ToBitmap(appIconBase64);
+            holder.appIcon.setImageBitmap(bitmap != null ? bitmap : getFallbackIcon());
         } else {
             holder.appIcon.setImageResource(R.drawable.baseline_android_24);
         }
@@ -100,13 +102,18 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
         }
     }
 
+    private Bitmap getFallbackIcon() {
+        return BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_android_24);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView appName, notificationContent, notificationDateTime;
+        private final TextView appName, notificationHeading, notificationContent, notificationDateTime;
         private final ImageView appIcon, imageButtonMenuActionBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             appName = itemView.findViewById(R.id.appName);
+            notificationHeading = itemView.findViewById(R.id.notificationHeading);
             notificationContent = itemView.findViewById(R.id.notificationContent);
             notificationDateTime = itemView.findViewById(R.id.notificationDateTime);
             appIcon = itemView.findViewById(R.id.appIcon);

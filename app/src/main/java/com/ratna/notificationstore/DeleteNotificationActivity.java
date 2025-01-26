@@ -77,6 +77,11 @@ popupMenu.setOnMenuItemClickListener(item -> {
         deleteAllNotifications();
         return true;
     }
+
+    if (itemId == R.id.action_restore_all){
+        restoreAllNotifications();
+        return true;
+    }
     return false;
 });
 popupMenu.show();
@@ -183,6 +188,10 @@ popupMenu.show();
                 .child(deviceId)
                 .child("deleted_notifications");
 
+        if (model.getNotificationHeading() == null || model.getNotificationHeading().isEmpty()) {
+            model.setNotificationHeading("No Heading");
+        }
+
         deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnSuccessListener(aVoid -> {
             //Toast.makeText(this, "Notification deleted permanently", Toast.LENGTH_SHORT).show();
         }).addOnFailureListener(e -> {
@@ -209,6 +218,10 @@ popupMenu.show();
                 .child(deviceId)
                 .child("notifications");
 
+        if (model.getNotificationHeading() == null || model.getNotificationHeading().isEmpty()) {
+            model.setNotificationHeading("No Heading");
+        }
+
         activeNotificationsRef.push().setValue(model).addOnSuccessListener(aVoid -> {
             deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnFailureListener(e -> {
                 Log.e("RestoreNotification", "Failed to remove from deleted: " + e.getMessage());
@@ -227,6 +240,59 @@ popupMenu.show();
             notificationAdapter.notifyItemInserted(position);
         });
     }
+
+    public void restoreAllNotifications() {
+        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("deleted_notifications");
+
+        DatabaseReference activeNotificationsRef = FirebaseDatabase.getInstance()
+                .getReference("devices")
+                .child(deviceId)
+                .child("notifications");
+
+        deletedNotificationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Toast.makeText(DeleteNotificationActivity.this, "No notifications to restore", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                List<DeleteNotificationModel> notificationsToRestore = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    DeleteNotificationModel model = dataSnapshot.getValue(DeleteNotificationModel.class);
+                    if (model != null) {
+                        notificationsToRestore.add(model);
+                    }
+                }
+
+                // Restore all notifications to active notifications
+                for (DeleteNotificationModel model : notificationsToRestore) {
+                    activeNotificationsRef.push().setValue(model).addOnSuccessListener(aVoid -> {
+                        // Successfully restored, now remove from deleted notifications
+                        deletedNotificationsRef.child(model.getUniqueKey()).removeValue();
+                    }).addOnFailureListener(e -> {
+                        Log.e("RestoreAllNotifications", "Failed to restore notification: " + e.getMessage());
+                        Toast.makeText(DeleteNotificationActivity.this, "Failed to restore notifications", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                // Clear deleted notifications list and refresh UI
+                deletedNotificationModels.clear();
+                notificationAdapter.notifyDataSetChanged();
+                Toast.makeText(DeleteNotificationActivity.this, "All notifications restored", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("RestoreAllNotifications", "Failed to fetch deleted notifications: " + error.getMessage());
+                Toast.makeText(DeleteNotificationActivity.this, "Failed to restore notifications", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     public void deleteAllNotifications(){
         DatabaseReference deleteNotificationsRef = FirebaseDatabase.getInstance()
