@@ -13,8 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,6 +30,7 @@ public class SplashScreen extends AppCompatActivity {
     private Animation animation;
     private static final String TAG = "SplashScreen";
     private ActivityResultLauncher<IntentSenderRequest> activityResultLauncher;
+    private boolean isUpdateRequired = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,39 +42,54 @@ public class SplashScreen extends AppCompatActivity {
         TextPaint paint = textView.getPaint();
         float width = paint.measureText(textView.getText().toString());
 
+        // Register result launcher for update flow completion
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Log.d(TAG, "Update flow completed successfully!");
                 Toast.makeText(this, "App updated successfully!", Toast.LENGTH_SHORT).show();
+                proceedToNextActivity();
             } else {
                 Log.e(TAG, "Update flow failed! Result code: " + result.getResultCode());
-                Toast.makeText(this, "App update failed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "App update failed! You cannot proceed without updating.", Toast.LENGTH_SHORT).show();
+                finish(); // Close the app if update fails
             }
         });
+
+        // Check for app update
         CheckForAppUpdate();
 
+        // Apply animation
         animation = AnimationUtils.loadAnimation(this, R.anim.image_animation);
         textView.startAnimation(animation);
 
-        Shader textShader = new LinearGradient(0, 0, width, textView.getTextSize(), new int[]{Color.parseColor("#ffffff"), Color.parseColor("#ffffff")}, null, Shader.TileMode.CLAMP);
+        // Set text gradient
+        Shader textShader = new LinearGradient(0, 0, width, textView.getTextSize(),
+                new int[]{Color.parseColor("#ffffff"), Color.parseColor("#ffffff")}, null, Shader.TileMode.CLAMP);
         textView.getPaint().setShader(textShader);
 
+        // Handle animation end and launch next activity if no update is required
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-            }
+            public void onAnimationStart(Animation animation) {}
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                Intent intent = new Intent(SplashScreen.this, WelcomeActivity.class);
-                startActivity(intent);
-                finish();
+                if (isUpdateRequired) {
+                    Log.d(TAG, "Update is required, blocking access.");
+                } else {
+                    proceedToNextActivity();
+                }
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
+            public void onAnimationRepeat(Animation animation) {}
         });
+    }
+
+    private void proceedToNextActivity() {
+        Intent intent = new Intent(SplashScreen.this, WelcomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void CheckForAppUpdate() {
@@ -91,7 +105,8 @@ public class SplashScreen extends AppCompatActivity {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
                 if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                     Log.d(TAG, "Immediate update is available.");
-                    Toast.makeText(this, "Immediate update is available.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Immediate update is available. Please update the app.", Toast.LENGTH_SHORT).show();
+                    isUpdateRequired = true; // Block access until update is completed
 
                     try {
                         appUpdateManager.startUpdateFlowForResult(
@@ -101,18 +116,18 @@ public class SplashScreen extends AppCompatActivity {
                     } catch (Exception e) {
                         Log.e(TAG, "Error starting update flow: " + e.getMessage());
                         Toast.makeText(this, "Failed to start update flow.", Toast.LENGTH_SHORT).show();
+                        finish(); // Close the app if there's an error
                     }
                 } else {
                     Log.d(TAG, "Update available but not allowed for immediate update.");
-                    Toast.makeText(this, "Update available but not immediate.", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Log.d(TAG, "No update available.");
-                Toast.makeText(this, "Your app is up to date!", Toast.LENGTH_SHORT).show();
+                proceedToNextActivity();
             }
         }).addOnFailureListener(e -> {
-            Log.e(TAG, "Failed to check for updates: " + e.getMessage());
-            Toast.makeText(this, "Error checking for updates.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Failed to check for updates: ", e);
+            proceedToNextActivity();
         });
     }
 }
