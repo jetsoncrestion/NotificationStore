@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/ralewayextrabold"
-        android:text="Save\nNotification"
+        android:text="@string/save_nnotification"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="@dimen/_45ssp"

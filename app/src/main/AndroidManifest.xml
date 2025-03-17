@@ -12,10 +12,14 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
     <uses-permission
@@ -31,12 +35,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationStore"
-        tools:targetApi="31">
+        tools:targetApi="34">
         <activity
-            android:name=".FilteredNotificationActivity"
+            android:name=".HowToUseApp"
             android:exported="false" />
         <activity
-            android:name=".ViewPagerTwo"
+            android:name=".Welcome"
+            android:exported="false" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FilteredNotificationActivity"
             android:exported="false" />
         <activity
             android:name=".AppSelectionSecond"
@@ -49,18 +59,6 @@
             android:exported="false" />
         <activity
             android:name=".TermsAndConditionsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".WelcomeFourth"
-            android:exported="false" />
-        <activity
-            android:name=".WelcomeThird"
-            android:exported="false" />
-        <activity
-            android:name=".WelcomeSecond"
-            android:exported="false" />
-        <activity
-            android:name=".WelcomeActivity"
             android:exported="false" />
 
         <service

@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,15 +26,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ratna.notificationstore.Model.NotificationModel;
 import com.ratna.notificationstore.R;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
+    private static final String TAG = "NotificationAdapter";
     private Context context;
     private List<NotificationModel> notificationModels;
 
@@ -44,7 +51,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @NonNull
     @Override
-    public NotificationAdapter.NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.notification, parent, false);
         return new NotificationViewHolder(view);
     }
@@ -56,8 +63,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.appName.setText(notificationModel.getAppName());
         holder.notificationContent.setText(notificationModel.getNotificationContent());
 
-        long timestamp = notificationModel.getNotificationDateTime();
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / HH:mm", Locale.getDefault()).format(new Date(timestamp));
+        long notificationTime = notificationModel.getTimeStamp();
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / hh:mm a", Locale.getDefault())
+                .format(new Date(notificationTime));
         holder.notificationDateTime.setText(formattedDate);
 
         String appIconBase64 = notificationModel.getAppIconBase64();
@@ -68,7 +76,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.appIcon.setImageResource(R.drawable.baseline_android_24);
         }
 
-        holder.imageButtonDelete.setOnClickListener(v -> deleteNotification(position));
+        holder.imageButtonDelete.setOnClickListener(v -> {
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition != RecyclerView.NO_POSITION) {
+                deleteNotification(currentPosition);
+            }
+        });
+
         holder.itemView.setOnClickListener(v -> {
             String packageName = notificationModel.getPackageName();
             if (packageName != null && !packageName.isEmpty()) {
@@ -107,61 +121,104 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     private void deleteNotification(int position) {
-        if (notificationModels == null || notificationModels.isEmpty() || position < 0 || position >= notificationModels.size()) {
+        if (notificationModels == null || position < 0 || position >= notificationModels.size()) {
             Log.e("NotificationAdapter", "Invalid position or notification list is null.");
             return;
         }
 
         NotificationModel model = notificationModels.get(position);
-
-        // Get deviceId from SharedPreferences
-        String deviceId = getDeviceId(context);
-        if (deviceId == null) {
-            Log.e("NotificationAdapter", "Device ID not found. Cannot delete notification.");
-            Toast.makeText(context, "Device not recognized", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String uniqueKey = model.getUniqueKey();
-        if (uniqueKey == null) {
-            Log.e("NotificationAdapter", "Unique key is null for notification at position: " + position);
-            Toast.makeText(context, "Failed to find item in Firebase", Toast.LENGTH_SHORT).show();
-            return;
-        }
         notificationModels.remove(position);
         notifyItemRemoved(position);
-//        notifyItemRangeChanged(position, notificationModels.size());
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("notifications");
+        File directory = new File(context.getFilesDir(), "NotificationStores");
+        if (!directory.exists() && !directory.mkdirs()) {
+            Log.e(TAG, "Failed to create directory");
+            return;
+        }
+        File activeFile = new File(directory, "notification.json");
+        File deletedFile = new File(directory, "deleted_notifications.json");
+        try {
+            JSONArray activeArray;
+            try (BufferedReader reader = new BufferedReader(new FileReader(activeFile))) {
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+            //reader.close();
+            String content = jsonBuilder.toString();
+                activeArray = content.isEmpty() ? new JSONArray() : new JSONArray(content);
+            }
 
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications").child(uniqueKey);
-        deletedNotificationsRef.setValue(model).addOnSuccessListener(aVoid -> {
+            JSONArray newActiveArray = new JSONArray();
+            boolean deleted = false;
+            String targetUniqueKey = model.getUniqueKey();
+            // Use a combination of fields to match the notification.
+//            long targetTimestamp = model.getNotificationDateTime();
+//            String targetHeading = model.getNotificationHeading();
+//            String targetContent = model.getNotificationContent();
+//            String targetAppName = model.getAppName();
 
-            databaseReference.child(uniqueKey).removeValue().addOnSuccessListener(aVoid1 -> {
-                Log.d("NotificationAdapter", "Notification deleted and saved to deleted_notifications successfully.");
-                // Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
-            }).addOnFailureListener(e -> {
-                Log.e("NotificationAdapter", "Failed to delete notification from notifications: " + e.getMessage());
-                Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < activeArray.length(); i++) {
+                JSONObject obj = activeArray.getJSONObject(i);
+                boolean match = false;
+                if (targetUniqueKey != null && !targetUniqueKey.isEmpty() && obj.has("uniqueKey")) {
+                    match = targetUniqueKey.equals(obj.getString("uniqueKey"));
+                } else {
+                    // Fallback comparison using other fields
+                    match = obj.optString("notificationHeading").equals(model.getNotificationHeading())
+                            && obj.optString("notificationContent").equals(model.getNotificationContent())
+                            && obj.optString("appName").equals(model.getAppName())
+                            && obj.optLong("timestamp") == model.getTimeStamp();
+                }
+                if (!deleted && match) {
+                    deleted = true;
+                    continue;
+                }
+                newActiveArray.put(obj);
+            }
+            try (FileWriter writer = new FileWriter(activeFile)) {
+                writer.write(newActiveArray.toString());
+            }
+            JSONArray deletedArray;
+            if (deletedFile.exists()) {
+                try (BufferedReader readerDeleted = new BufferedReader(new FileReader(deletedFile))) {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = readerDeleted.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    String deletedContent = sb.toString();
+                    deletedArray = deletedContent.isEmpty() ? new JSONArray() : new JSONArray(deletedContent);
+                }
+            } else {
+                deletedArray = new JSONArray();
+            }
 
-                notificationModels.add(position, model);
-                notifyItemInserted(position);
-//                                notifyItemRangeChanged(position, notificationModels.size());
-            });
-        }).addOnFailureListener(e -> {
-            Log.e("NotificationAdapter", "Failed to save notification to deleted_notifications: " + e.getMessage());
-            Toast.makeText(context, "Failed to save deleted notification", Toast.LENGTH_SHORT).show();
-
-            notificationModels.add(position, model);
-            notifyItemInserted(position);
-            notifyItemRangeChanged(position, notificationModels.size());
-        });
+            JSONObject deletedObj = new JSONObject();
+            deletedObj.put("notificationHeading", model.getNotificationHeading());
+            deletedObj.put("notificationContent", model.getNotificationContent());
+            deletedObj.put("timestamp", model.getTimeStamp());
+            deletedObj.put("appName", model.getAppName());
+            deletedObj.put("packageName", model.getPackageName());
+            deletedObj.put("appIconBase64", model.getAppIconBase64());
+            deletedObj.put("uniqueKey", model.getUniqueKey());
+            deletedArray.put(deletedObj);
+            try (FileWriter writer = new FileWriter(deletedFile)) {
+                writer.write(deletedArray.toString());
+            }
+            Toast.makeText(context, "Notification deleted", Toast.LENGTH_SHORT).show();
+            Log.d("NotificationAdapter", "Notification deleted from local storage.");
+        } catch (Exception e) {
+            Log.e("NotificationAdapter", "Error deleting notification from local storage: " + e.getMessage());
+            Toast.makeText(context, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private String getDeviceId(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("DeviceID", null);
-    }
+//    private String getDeviceId(Context context) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences("NotificationStorePrefs", Context.MODE_PRIVATE);
+//        return sharedPreferences.getString("DeviceID", null);
+//    }
 
     @Override
     public int getItemCount() {
@@ -190,13 +247,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 GradientDrawable drawable = new GradientDrawable();
                 drawable.setCornerRadius(60);
                 drawable.setColor(Color.WHITE);
-
                 window.setBackgroundDrawable(drawable);
             }
         });
-
         dialog.show();
-
         close.setOnClickListener(v -> dialog.dismiss());
     }
 
@@ -231,7 +285,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notifyDataSetChanged();
     }
 
-    public interface UniqueKeyCallback {
-        void onUniqueKeyRetrieved(String uniqueKey);
-    }
+//    public interface UniqueKeyCallback {
+//        void onUniqueKeyRetrieved(String uniqueKey);
+//    }
 }

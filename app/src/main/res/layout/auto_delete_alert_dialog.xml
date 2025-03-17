@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp"
                 android:fontFamily="@font/roboto"
-                android:text="Never delete"
+                android:text="@string/never_delete"
                 android:textColor="@color/special"
                 android:textSize="@dimen/_13ssp" />
 
@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp"
-                android:text="Delete Daily"
+                android:text="@string/delete_daily"
                 android:textColor="@color/special"
                 android:fontFamily="@font/roboto"
                 android:textSize="@dimen/_13ssp" />
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp"
-                android:text="Delete older than 1 week"
+                android:text="@string/delete_older_than_1_week"
                 android:textColor="@color/special"
                 android:fontFamily="@font/roboto"
                 android:textSize="@dimen/_13ssp" />
@@ -59,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp"
-                android:text="Delete older than 1 month"
+                android:text="@string/delete_older_than_1_month"
                 android:textColor="@color/special"
                 android:textSize="@dimen/_13ssp"
                 android:fontFamily="@font/roboto"/>
@@ -73,7 +73,7 @@
             android:layout_marginEnd="@dimen/_18sdp"
             android:layout_marginBottom="@dimen/_4sdp"
             android:fontFamily="@font/roboto"
-            android:text="Accept"
+            android:text="@string/accept"
             android:textColor="#F06924"
             android:textSize="@dimen/_18ssp"
             android:textStyle="bold"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/_18sdp"
             android:fontFamily="@font/roboto"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:textColor="#592E2E"
             android:textSize="@dimen/_18ssp"
             android:textStyle="bold"

@@ -25,12 +25,12 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
+import com.ratna.notificationstore.Fragments.WelcomeFragment;
 
 public class SplashScreen extends AppCompatActivity {
     private Animation animation;
     private static final String TAG = "SplashScreen";
-    private ActivityResultLauncher<IntentSenderRequest> activityResultLauncher;
-    private boolean isUpdateRequired = false;
+    private boolean isAnimationFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,22 +41,6 @@ public class SplashScreen extends AppCompatActivity {
         TextView textView = findViewById(R.id.textView);
         TextPaint paint = textView.getPaint();
         float width = paint.measureText(textView.getText().toString());
-
-        // Register result launcher for update flow completion
-        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
-            if (result.getResultCode() == RESULT_OK) {
-                Log.d(TAG, "Update flow completed successfully!");
-                Toast.makeText(this, "App updated successfully!", Toast.LENGTH_SHORT).show();
-                proceedToNextActivity();
-            } else {
-                Log.e(TAG, "Update flow failed! Result code: " + result.getResultCode());
-                Toast.makeText(this, "App update failed! You cannot proceed without updating.", Toast.LENGTH_SHORT).show();
-                finish(); // Close the app if update fails
-            }
-        });
-
-        // Check for app update
-        CheckForAppUpdate();
 
         // Apply animation
         animation = AnimationUtils.loadAnimation(this, R.anim.image_animation);
@@ -74,11 +58,8 @@ public class SplashScreen extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (isUpdateRequired) {
-                    Log.d(TAG, "Update is required, blocking access.");
-                } else {
-                    proceedToNextActivity();
-                }
+                isAnimationFinished = true;
+               proceedToNextActivity();
             }
 
             @Override
@@ -87,47 +68,7 @@ public class SplashScreen extends AppCompatActivity {
     }
 
     private void proceedToNextActivity() {
-        Intent intent = new Intent(SplashScreen.this, WelcomeActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, Welcome.class));
         finish();
-    }
-
-    private void CheckForAppUpdate() {
-        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
-
-        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
-
-        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
-            Log.d(TAG, "Update Availability: " + appUpdateInfo.updateAvailability());
-            Log.d(TAG, "Is Immediate Update Allowed: " + appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE));
-            Log.d(TAG, "Is Flexible Update Allowed: " + appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE));
-
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                    Log.d(TAG, "Immediate update is available.");
-                    Toast.makeText(this, "Immediate update is available. Please update the app.", Toast.LENGTH_SHORT).show();
-                    isUpdateRequired = true; // Block access until update is completed
-
-                    try {
-                        appUpdateManager.startUpdateFlowForResult(
-                                appUpdateInfo,
-                                activityResultLauncher,
-                                AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build());
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error starting update flow: " + e.getMessage());
-                        Toast.makeText(this, "Failed to start update flow.", Toast.LENGTH_SHORT).show();
-                        finish(); // Close the app if there's an error
-                    }
-                } else {
-                    Log.d(TAG, "Update available but not allowed for immediate update.");
-                }
-            } else {
-                Log.d(TAG, "No update available.");
-                proceedToNextActivity();
-            }
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Failed to check for updates: ", e);
-            proceedToNextActivity();
-        });
     }
 }

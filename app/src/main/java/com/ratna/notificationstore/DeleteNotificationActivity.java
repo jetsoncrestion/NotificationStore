@@ -2,6 +2,7 @@ package com.ratna.notificationstore;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -25,17 +26,27 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DeleteNotificationActivity extends AppCompatActivity implements DeleteNotificationAdapter.OnDeleteNotificationListener {
-
+    private static final String TAG = "DeleteNotificationActivity";
     private RecyclerView recyclerView;
     private DeleteNotificationAdapter notificationAdapter;
-    private List<DeleteNotificationModel> deletedNotificationModels;
-    private String deviceId;
+    private ArrayList<DeleteNotificationModel> deletedNotificationModels;
+  //  private ArrayList<DeleteNotificationModel> recentlyDeletedNotifications;
+    //private String deviceId;
     private ImageView imageBack, imageViewMenuActionBar;
     private int selectedPosition = -1;
+    private File deletedNotificationsFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +55,6 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
 
         imageBack = findViewById(R.id.imageBack);
         imageViewMenuActionBar = findViewById(R.id.imageViewMenu);
-        deviceId = DeviceUtil.getOrGenerateDeviceId(this);
-
         recyclerView = findViewById(R.id.deleteNotificationRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,91 +74,105 @@ public class DeleteNotificationActivity extends AppCompatActivity implements Del
         });
 
         imageViewMenuActionBar.setOnClickListener(v -> {
-PopupMenu popupMenu = new PopupMenu(DeleteNotificationActivity.this, imageViewMenuActionBar);
-popupMenu.inflate(R.menu.main_menu);
-Menu menu = popupMenu.getMenu();
-
-//MenuItem deleteAllItem = menu.add(Menu.NONE, R.id.action_delete_all, Menu.NONE, "");
-
-popupMenu.setOnMenuItemClickListener(item -> {
-    int itemId = item.getItemId();
-    if (itemId == R.id.action_delete_all) {
-        deleteAllNotifications();
-        return true;
-    }
-
-    if (itemId == R.id.action_restore_all){
-        restoreAllNotifications();
-        return true;
-    }
-    return false;
-});
-popupMenu.show();
+            PopupMenu popupMenu = new PopupMenu(DeleteNotificationActivity.this, imageViewMenuActionBar);
+            popupMenu.inflate(R.menu.main_menu);
+            Menu menu = popupMenu.getMenu();
+            popupMenu.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.action_delete_all) {
+                    deleteAllNotifications();
+                    return true;
+                }
+                if (itemId == R.id.action_restore_all) {
+                    restoreAllNotifications();
+                    return true;
+                }
+                return false;
+            });
+            popupMenu.show();
         });
 
+        File directory = new File(getFilesDir(), "NotificationStores");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        deletedNotificationsFile = new File(directory, "deleted_notifications.json");
         autoDeleteOldNotifications();
         loadDeletedNotifications();
-    }
-
-    private void autoDeleteOldNotifications() {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
-
-        deletedNotificationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    DeleteNotificationModel model = dataSnapshot.getValue(DeleteNotificationModel.class);
-                    if (model != null && model.getTimeStamp() != 0) {
-                        long currentTime = System.currentTimeMillis();
-                        long notificationTime = model.getTimeStamp();
-                        long timeDifference = currentTime - notificationTime;
-
-                        if (timeDifference > 7776000000L) {
-                            deletedNotificationsRef.child(dataSnapshot.getKey()).removeValue();
-                            Log.d("AutoDelete", "Notification older than 90 days deleted");
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("AutoDelete", "Error checking for old notifications: " + error.getMessage());
-            }
-        });
-    }
-
-    private void loadDeletedNotifications() {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance().getReference("devices").child(deviceId).child("deleted_notifications");
-
-        deletedNotificationsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                deletedNotificationModels.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    DeleteNotificationModel model = dataSnapshot.getValue(DeleteNotificationModel.class);
-                    if (model != null) {
-                        model.setUniqueKey(dataSnapshot.getKey());
-                        deletedNotificationModels.add(model);
-                    }
-                }
-                notificationAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("LoadDeleted", "Failed to load deleted notifications: " + error.getMessage());
-            }
-        });
 
         imageBack.setOnClickListener(v -> {
             Intent intent = new Intent(DeleteNotificationActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });
+    }
+
+    private void autoDeleteOldNotifications() {
+        if (!deletedNotificationsFile.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(deletedNotificationsFile))) {
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+            //reader.close();
+            String content = jsonBuilder.toString();
+            if (content.isEmpty()) return;
+            JSONArray jsonArray = new JSONArray(content);
+            JSONArray newArray = new JSONArray();
+            long currentTime = System.currentTimeMillis();
+            long ninetyDaysMillis = 90L * 24 * 60 * 60 * 1000; // 90 days
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                long timeStamp = obj.optLong("timestamp");
+                if (currentTime - timeStamp <= ninetyDaysMillis) {
+                    newArray.put(obj);
+                }
+            }
+            try (FileWriter writer = new FileWriter(deletedNotificationsFile)) {
+                writer.write(newArray.toString());
+            }
+            Log.d(TAG, "Auto-deletion in deleted file complete. Count: " + newArray.length());
+            // writer.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in autoDeleteOldNotifications", e);
+        }
+    }
+
+    private void loadDeletedNotifications() {
+        deletedNotificationModels.clear();
+        if (!deletedNotificationsFile.exists()) {
+            Toast.makeText(this, "No deleted notifications found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(deletedNotificationsFile))) {
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+            //reader.close();
+            String content = jsonBuilder.toString();
+            if (!content.isEmpty()) {
+                JSONArray jsonArray = new JSONArray(content);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject obj = jsonArray.getJSONObject(i);
+                    DeleteNotificationModel model = new DeleteNotificationModel();
+                    model.setNotificationHeading(obj.optString("notificationHeading"));
+                    model.setNotificationContent(obj.optString("notificationContent"));
+                    model.setTimeStamp(obj.optLong("timestamp"));
+                    model.setAppName(obj.optString("appName"));
+                    model.setPackageName(obj.optString("packageName"));
+                    model.setAppIconBase64(obj.optString("appIconBase64"));
+                    model.setUniqueKey(obj.optString("uniqueKey"));
+                    deletedNotificationModels.add(model);
+                }
+            }
+            notificationAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading deleted notifications", e);
+            Toast.makeText(this, "Error loading deleted notifications", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -166,9 +189,7 @@ popupMenu.show();
         }
 
         DeleteNotificationModel model = notificationAdapter.getNotificationAt(selectedPosition);
-
         int itemId = item.getItemId();
-
         if (itemId == R.id.action_Delete_selection) {
             onDeleteNotification(model, selectedPosition);
             return true;
@@ -178,135 +199,162 @@ popupMenu.show();
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onDeleteNotification(DeleteNotificationModel model, int position) {
-        deletedNotificationModels.remove(position);
-        notificationAdapter.notifyItemRemoved(position);
-
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
-
-        if (model.getNotificationHeading() == null || model.getNotificationHeading().isEmpty()) {
-            model.setNotificationHeading("No Heading");
+        if (deletedNotificationModels == null || position < 0 || position >= deletedNotificationModels.size()) {
+            Toast.makeText(this, "Invalid notification selected", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnSuccessListener(aVoid -> {
-            //Toast.makeText(this, "Notification deleted permanently", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Log.e("DeleteNotification", "Failed to delete notification: " + e.getMessage());
-            Toast.makeText(this, "Failed to delete notification", Toast.LENGTH_SHORT).show();
-
-            deletedNotificationModels.add(position, model);
-            notificationAdapter.notifyItemInserted(position);
-        });
+        deletedNotificationModels.remove(position);
+        notificationAdapter.notifyItemRemoved(position);
+        updateDeletedNotificationsFile();
+        Toast.makeText(this, "Notification deleted permanently", Toast.LENGTH_SHORT).show();
+        selectedPosition = -1;
     }
 
     @Override
     public void onRestoreNotification(DeleteNotificationModel model, int position) {
         deletedNotificationModels.remove(position);
         notificationAdapter.notifyItemRemoved(position);
-
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
-
-        DatabaseReference activeNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-
-        if (model.getNotificationHeading() == null || model.getNotificationHeading().isEmpty()) {
-            model.setNotificationHeading("No Heading");
-        }
-
-        activeNotificationsRef.push().setValue(model).addOnSuccessListener(aVoid -> {
-            deletedNotificationsRef.child(model.getUniqueKey()).removeValue().addOnFailureListener(e -> {
-                Log.e("RestoreNotification", "Failed to remove from deleted: " + e.getMessage());
-                Toast.makeText(this, "Failed to remove from deleted notifications", Toast.LENGTH_SHORT).show();
-
-                deletedNotificationModels.add(position, model);
-                notificationAdapter.notifyItemInserted(position);
-            });
-
+        updateDeletedNotificationsFile();
+        File directory = new File(getFilesDir(), "NotificationStores");
+        File activeNotificationsFile = new File(directory, "notification.json");
+        try {
+            JSONArray activeArray;
+            if (activeNotificationsFile.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(activeNotificationsFile))) {
+                    StringBuilder activeBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        activeBuilder.append(line);
+                    }
+                    //reader.close();
+                    String activeContent = activeBuilder.toString();
+                    activeArray = activeContent.isEmpty() ? new JSONArray() : new JSONArray(activeContent);
+                }
+            } else {
+                activeArray = new JSONArray();
+            }
+            JSONObject obj = new JSONObject();
+            obj.put("notificationHeading", model.getNotificationHeading());
+            obj.put("notificationContent", model.getNotificationContent());
+            obj.put("timestamp", model.getTimeStamp());
+            obj.put("appName", model.getAppName());
+            obj.put("packageName", model.getPackageName());
+            obj.put("appIconBase64", model.getAppIconBase64());
+            obj.put("uniqueKey", model.getUniqueKey());
+            activeArray.put(obj);
+            try (FileWriter writer = new FileWriter(activeNotificationsFile)) {
+                writer.write(activeArray.toString());
+            }
+            // writer.close();
             Toast.makeText(this, "Notification restored", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Log.e("RestoreNotification", "Failed to restore notification: " + e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to restore notification", e);
             Toast.makeText(this, "Failed to restore notification", Toast.LENGTH_SHORT).show();
-
-            deletedNotificationModels.add(position, model);
-            notificationAdapter.notifyItemInserted(position);
-        });
+        }
+        selectedPosition = -1;
     }
 
     public void restoreAllNotifications() {
-        DatabaseReference deletedNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
-
-        DatabaseReference activeNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-
-        deletedNotificationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    Toast.makeText(DeleteNotificationActivity.this, "No notifications to restore", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                List<DeleteNotificationModel> notificationsToRestore = new ArrayList<>();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    DeleteNotificationModel model = dataSnapshot.getValue(DeleteNotificationModel.class);
-                    if (model != null) {
-                        notificationsToRestore.add(model);
+        File directory = new File(getFilesDir(), "NotificationStores");
+        File activeNotificationsFile = new File(directory, "notification.json");
+        if (!deletedNotificationsFile.exists()) {
+            Toast.makeText(this, "No notifications to restore", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(deletedNotificationsFile))) {
+            StringBuilder deletedBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                deletedBuilder.append(line);
+            }
+            //reader.close();
+            String deletedContent = deletedBuilder.toString();
+            if (deletedContent.isEmpty()) {
+                Toast.makeText(this, "No notifications to restore", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            JSONArray deletedArray = new JSONArray(deletedContent);
+            JSONArray activeArray;
+            if (activeNotificationsFile.exists()) {
+                try (BufferedReader activeReader = new BufferedReader(new FileReader(activeNotificationsFile))) {
+                    StringBuilder activeBuilder = new StringBuilder();
+                    while ((line = activeReader.readLine()) != null) {
+                        activeBuilder.append(line);
                     }
+                    //activeReader.close();
+                    String activeContent = activeBuilder.toString();
+                    activeArray = activeContent.isEmpty() ? new JSONArray() : new JSONArray(activeContent);
                 }
-
-                // Restore all notifications to active notifications
-                for (DeleteNotificationModel model : notificationsToRestore) {
-                    activeNotificationsRef.push().setValue(model).addOnSuccessListener(aVoid -> {
-                        // Successfully restored, now remove from deleted notifications
-                        deletedNotificationsRef.child(model.getUniqueKey()).removeValue();
-                    }).addOnFailureListener(e -> {
-                        Log.e("RestoreAllNotifications", "Failed to restore notification: " + e.getMessage());
-                        Toast.makeText(DeleteNotificationActivity.this, "Failed to restore notifications", Toast.LENGTH_SHORT).show();
-                    });
-                }
-
-                // Clear deleted notifications list and refresh UI
-                deletedNotificationModels.clear();
-                notificationAdapter.notifyDataSetChanged();
-                Toast.makeText(DeleteNotificationActivity.this, "All notifications restored", Toast.LENGTH_SHORT).show();
+            } else {
+                activeArray = new JSONArray();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("RestoreAllNotifications", "Failed to fetch deleted notifications: " + error.getMessage());
-                Toast.makeText(DeleteNotificationActivity.this, "Failed to restore notifications", Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < deletedArray.length(); i++) {
+                JSONObject obj = deletedArray.getJSONObject(i);
+                activeArray.put(obj);
             }
-        });
+            try (FileWriter activeWriter = new FileWriter(activeNotificationsFile)) {
+                activeWriter.write(activeArray.toString());
+            }
+            //activeWriter.close();
+            // Clear deleted notifications file
+            try (FileWriter deletedWriter = new FileWriter(deletedNotificationsFile)) {
+                deletedWriter.write("[]");
+            }
+            //deletedWriter.close();
+            deletedNotificationModels.clear();
+            notificationAdapter.notifyDataSetChanged();
+            Toast.makeText(this, "All notifications restored", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to restore notifications", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
-    public void deleteAllNotifications(){
-        DatabaseReference deleteNotificationsRef = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("deleted_notifications");
-
-        deleteNotificationsRef.removeValue().addOnSuccessListener(aVoid ->{
-            Toast.makeText(this, "All notifications deleted", Toast.LENGTH_SHORT).show();
-            deletedNotificationModels.clear();;
+    public void deleteAllNotifications() {
+        if (deletedNotificationsFile.exists()) {
+            try (FileWriter writer = new FileWriter(deletedNotificationsFile)) {
+                writer.write("[]");
+                //  writer.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            deletedNotificationModels.clear();
             notificationAdapter.notifyDataSetChanged();
-        }).addOnFailureListener(e -> {
-            Log.e("DeleteAll", "Failed to delete all notifications: " + e.getMessage());
+            Toast.makeText(this, "All notifications deleted", Toast.LENGTH_SHORT).show();
+        } else {
             Toast.makeText(this, "Failed to delete notifications", Toast.LENGTH_SHORT).show();
-        });
+        }
+    }
+
+    private void updateDeletedNotificationsFile() {
+        File directory = new File(getFilesDir(), "NotificationStores");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        try {
+            JSONArray newArray = new JSONArray();
+            for (DeleteNotificationModel model : deletedNotificationModels) {
+                JSONObject obj = new JSONObject();
+                obj.put("notificationHeading", model.getNotificationHeading());
+                obj.put("notificationContent", model.getNotificationContent());
+                obj.put("timestamp", model.getTimeStamp());
+                obj.put("appName", model.getAppName());
+                obj.put("packageName", model.getPackageName());
+                obj.put("appIconBase64", model.getAppIconBase64());
+                obj.put("uniqueKey", model.getUniqueKey());
+                newArray.put(obj);
+            }
+            try (FileWriter writer = new FileWriter(deletedNotificationsFile)) {
+                writer.write(newArray.toString());
+                //writer.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating deleted notifications file", e);
+        }
     }
 }

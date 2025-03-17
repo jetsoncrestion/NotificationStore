@@ -26,7 +26,7 @@
         android:layout_marginTop="@dimen/_8sdp"
         android:textStyle="bold"
         android:padding="@dimen/_6sdp"
-        android:text="Search by Text"
+        android:text="@string/search_by_text"
         android:textAlignment="center"
         android:textColor="@color/special"
         android:textSize="@dimen/_20sdp"
@@ -38,7 +38,7 @@
         android:id="@+id/textViewSubHeading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Easily find notifications by entering a text string. You can also refine your search by combining it with application and time-based filters."
+        android:text="@string/easily_find_notifications_by_entering_a_text_string_you_can_also_refine_your_search_by_combining_it_with_application_and_time_based_filters"
         android:fontFamily="@font/roboto"
         android:padding="@dimen/_6sdp"
         android:lineSpacingExtra="@dimen/_3sdp"
@@ -55,7 +55,7 @@
         android:layout_width="@dimen/_240sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginTop="@dimen/_100sdp"
-        android:text="Get Started"
+        android:text="@string/get_started"
         android:fontFamily="@font/poppins_regular"
         android:background="@drawable/custom_svae"
         android:textColor="@color/white"
@@ -67,29 +67,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewSubHeading" />
-
-    <!--    <TextView-->
-<!--        android:id="@+id/textViewSkip"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="@dimen/_25sdp"-->
-<!--        android:layout_marginEnd="@dimen/_15sdp"-->
-<!--        android:fontFamily="@font/roboto"-->
-<!--        android:textStyle="bold"-->
-<!--        android:textSize="@dimen/_14ssp"-->
-<!--        android:textColor="#F06924"-->
-<!--        android:text="Skip"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/imageViewArrowRight"-->
-<!--        android:layout_marginEnd="@dimen/_15sdp"-->
-<!--        android:layout_marginBottom="@dimen/_25sdp"-->
-<!--        android:layout_width="@dimen/_30sdp"-->
-<!--        android:layout_height="@dimen/_30sdp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:srcCompat="@drawable/arrow_right" />-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>

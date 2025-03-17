@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:fontFamily="@font/roboto"
-                android:text="App name"
+                android:text="@string/app_name"
                 android:textColor="@color/special"
                 android:textSize="@dimen/_14ssp"
                 app:layout_constraintBottom_toBottomOf="@+id/appIcon"

@@ -6,7 +6,7 @@ public class NotificationModel {
     private long timeStamp;
     private String notificationHeading;
     private String notificationContent;
-    private long notificationDateTime;
+    //private long notificationDateTime;
     private String appIconBase64;
     private String imageButtonDelete;
     private String packageName;
@@ -18,13 +18,13 @@ public class NotificationModel {
     }
 
     // Constructor with parameters
-    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, long notificationDateTime, String appIconBase64, String imageButtonDelete, String packageName, String imageBase64) {
+    public NotificationModel(String uniqueKey, String appName, long timeStamp, String notificationHeading, String notificationContent, String appIconBase64, String imageButtonDelete, String packageName, String imageBase64) {
         this.uniqueKey = uniqueKey;
         this.appName = appName;
         this.timeStamp = timeStamp == 0 ? System.currentTimeMillis() : timeStamp;
         this.notificationHeading = notificationHeading;
         this.notificationContent = notificationContent;
-        this.notificationDateTime = notificationDateTime;
+       // this.notificationDateTime = notificationDateTime;
         this.appIconBase64 = appIconBase64;
         this.imageButtonDelete = imageButtonDelete;
         this.packageName = packageName;
@@ -69,13 +69,13 @@ public class NotificationModel {
         this.notificationContent = notificationContent;
     }
 
-    public long getNotificationDateTime() {
-        return notificationDateTime;
-    }
+  //  public long getNotificationDateTime() {
+  //      return notificationDateTime;
+  //  }
 
-    public void setNotificationDateTime(long notificationDateTime) {
-        this.notificationDateTime = notificationDateTime;
-    }
+//    public void setNotificationDateTime(long notificationDateTime) {
+//        this.notificationDateTime = notificationDateTime;
+//    }
 
     public String getAppIconBase64() {
         return appIconBase64;

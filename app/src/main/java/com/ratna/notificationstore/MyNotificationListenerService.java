@@ -1,5 +1,8 @@
 package com.ratna.notificationstore;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,7 +13,9 @@ import android.graphics.Canvas;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.NotificationListenerService;
@@ -18,35 +23,67 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.ratna.notificationstore.Model.NotificationModel;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MyNotificationListenerService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
-    private final Set<String> recentNotifications = ConcurrentHashMap.newKeySet();
+    private final Set<String> recentNotifications = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "NotificationListenerService created");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "NotificationListenerService destroyed");
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        Log.d(TAG, "App task removed, re-initializing service");
+        // Re-initialize the service
+        Intent intent = new Intent(this, MyNotificationListenerService.class);
+        startService(intent);
+    }
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
         Bundle extras = sbn.getNotification().extras;
-        String title = sbn.getNotification().extras.getString("android.title");
-        String text = sbn.getNotification().extras.getString("android.text");
-       String subject = sbn.getNotification().extras.getString("android.subText");
-        String bigText = sbn.getNotification().extras.getString("android.bigText");
+        String title = extras.getString("android.title");
+        String text = extras.getString("android.text");
+        String subject = extras.getString("android.subText");
+        String bigText = extras.getString("android.bigText");
 
         for (String key : extras.keySet()) {
             Log.d(TAG, "Key: " + key + " Value: " + extras.get(key));
+        }
+
+        if (text != null && (text.contains("Checking for new messages") || text.matches(".*messages from \\d+ chats.*"))) {
+            Log.d(TAG, "Skipping notification with text: " + text);
+            return;
         }
 
         if (text != null && text.matches("\\d+ new messages")) {
@@ -55,13 +92,13 @@ public class MyNotificationListenerService extends NotificationListenerService {
             return;
         }
 
-        if (packageName.equals("com.whatsapp")) {
+        if (packageName.equals("com.whatsapp") || packageName.equals("com.whatsapp.w4b")) {
             String textLines = extras.getString("android.textLines");
             if (!TextUtils.isEmpty(textLines)) {
                 text = textLines; // Update text to use textLines if available
             }
 
-            if (text != null && text.contains("image") || text.contains("photo")) {
+            if (text != null && (text.contains("image") || text.contains("photo"))) {
                 String notificationKey = packageName + "|" + title + "|" + text;
 
                 synchronized (recentNotifications) {
@@ -161,14 +198,11 @@ public class MyNotificationListenerService extends NotificationListenerService {
         }
 
         Set<String> selectedApps = preferences.getStringSet("selectedApps", new HashSet<>());
-
         Log.d(TAG, "Selected apps: " + selectedApps);
-
         if (!selectedApps.contains(packageName)) {
             Log.d(TAG, "Notification from non-selected app: " + packageName + ", skipping.");
             return;
         }
-
         if (packageName.equals("com.android.systemui")) {
             Log.d(TAG, "Ignored notification from System UI.");
             return;
@@ -182,18 +216,17 @@ public class MyNotificationListenerService extends NotificationListenerService {
             ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
             appName = pm.getApplicationLabel(appInfo).toString();
             Drawable appIconDrawable = pm.getApplicationIcon(packageName);
-            appIconBase64 = drawableToBase64(appIconDrawable);
+            appIconBase64 = shortenBase64(drawableToBase64(appIconDrawable));
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "App not found: " + packageName, e);
             appName = packageName;
         }
 
-        saveNotificationToFirebase(appName, heading, text, timestamp, appIconBase64, packageName);
+        saveNotificationToInternalStorage(appName, heading, text, timestamp, shortenBase64(appIconBase64), packageName);
 
         Intent intent = pm.getLaunchIntentForPackage(packageName);
         if (intent != null) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);  // Ensure it's a new task
-
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     this,
                     0,
@@ -211,45 +244,60 @@ public class MyNotificationListenerService extends NotificationListenerService {
             // Get the NotificationManager to issue the notification
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+
                 return;
             }
             notificationManager.notify((int) timestamp, builder.build());
         }
     }
 
-    private void saveNotificationToFirebase(String appName, String heading, String text, long timestamp, String appIconBase64, String packageName) {
-        // Retrieve device ID
-        String deviceId = DeviceUtil.getOrGenerateDeviceId(this);
+    private void saveNotificationToInternalStorage(String appName, String heading, String text, long timestamp, String appIconBase64, String packageName) {
+        try{
+            appIconBase64 = shortenBase64(appIconBase64);
+            File directory = new File(getFilesDir(), "NotificationStores");
+            if (!directory.exists() && !directory.mkdirs()) {
+                Log.e(TAG, "Failed to create directory for notifications: " + directory.getAbsolutePath());
+                return;
+            }
+            File file = new File(directory, "notification.json");
+            JSONArray jsonArray;
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                StringBuilder jsonBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonBuilder.append(line);
+                }
+                reader.close();
+                jsonArray = new JSONArray(jsonBuilder.toString());
+            } else {
+                jsonArray = new JSONArray();
+            }
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("devices")
-                .child(deviceId)
-                .child("notifications");
-        String notificationId = String.valueOf(timestamp);
+                JSONObject notificationObject = new JSONObject();
+               notificationObject.put("appName", appName);
+               notificationObject.put("notificationHeading", heading);
+               notificationObject.put("notificationContent", text);
+               notificationObject.put("timestamp", timestamp);
+               notificationObject.put("appIconBase64", appIconBase64);
+               notificationObject.put("packageName", packageName);
+               jsonArray.put(notificationObject);
 
-        NotificationModel notification = new NotificationModel();
-        notification.setUniqueKey(notificationId);
-        notification.setAppName(appName);
-        notification.setNotificationHeading(heading);
-        notification.setNotificationContent(text);
-        notification.setNotificationDateTime(timestamp);
-        notification.setAppIconBase64(appIconBase64);
-        notification.setPackageName(packageName);
-
-        if (notificationId != null) {
-            databaseReference.child(notificationId).setValue(notification)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification saved successfully for device: " + deviceId))
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to save notification to Firebase.", e));
-        } else {
-            Log.e(TAG, "Failed to generate notification ID.");
+            FileWriter writer = new FileWriter(file, false);
+            writer.write(jsonArray.toString());
+            writer.flush();
+            writer.close();
+                Log.d(TAG, "Notification saved internally: " + notificationObject.toString());
+        } catch (Exception e){
+            Log.e(TAG, "Failed to save notification internally", e);
         }
+    }
+
+    private String shortenBase64(String base64String) {
+        if (base64String == null || base64String.length() <= 10) {
+            return base64String;
+        }
+        return base64String.substring(0, 10);
     }
 
     private void handleMultiMessageNotification(String packageName, String messageSummary) {
@@ -281,17 +329,19 @@ public class MyNotificationListenerService extends NotificationListenerService {
                     targetHeight,
                     true
             );
-        } else if (drawable instanceof AdaptiveIconDrawable) {
-            Bitmap tempBitmap = Bitmap.createBitmap(
-                    drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888
-            );
-            Canvas canvas = new Canvas(tempBitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (drawable instanceof AdaptiveIconDrawable) {
+                Bitmap tempBitmap = Bitmap.createBitmap(
+                        drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
+                        Bitmap.Config.ARGB_8888
+                );
+                Canvas canvas = new Canvas(tempBitmap);
+                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                drawable.draw(canvas);
 
-            bitmap = Bitmap.createScaledBitmap(tempBitmap, targetWidth, targetHeight, true);
+                bitmap = Bitmap.createScaledBitmap(tempBitmap, targetWidth, targetHeight, true);
+            }
         }
 
         if (bitmap != null) {

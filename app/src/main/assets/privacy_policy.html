@@ -3,12 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy</title>
-  <link rel="stylesheet" href="privacy_policy.css" />
-  <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-          rel="stylesheet"
-  />
+  <title>Privacy Policy - Notify: Notifications History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset and base styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f4f7f6;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2C3E50;
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+    }
+
+    h3 {
+      color: #34495e;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 8px;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin-bottom: 20px;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    ul {
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    a {
+      color: #2980b9;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #1abc9c;
+      text-decoration: underline;
+    }
+
+    code {
+      background: #ecf0f1;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      background: #2C3E50;
+      color: #ffffff;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      h3 {
+        font-size: 1.3rem;
+      }
+      p, li {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -17,28 +114,20 @@
   <section>
     <h3>Introduction</h3>
     <p>
-      At Notify: Notifications History, we value your privacy. This Privacy Policy outlines
-      how we collect, use, and protect your information. We are dedicated to
-      keeping your data safe and ensuring that your experience with the app
-      remains secure and transparent.
+      At Notify: Notifications History, we value your privacy. This Privacy Policy outlines how we collect, use, and protect your information. We are dedicated to keeping your data safe and ensuring that your experience with the app remains secure and transparent.
     </p>
   </section>
 
   <section>
     <h3>Data Collection</h3>
     <p>
-      To provide you with the best experience, Notify: Notifications History collects and
-      stores the following information:
+      To provide you with the best experience, Notify: Notifications History collects and stores the following information:
     </p>
     <p>
-      <strong>Notifications:</strong> The notifications you choose to store are securely stored in Firebase.
-      Notifications that you delete are stored temporarily in a "Recently Deleted" section for easy recovery
-      and will be automatically deleted after 90 days.
+      <strong>Notifications:</strong> The notifications you choose to store are securely saved on your device's local internal storage. This ensures that your notifications persist even after uninstalling and reinstalling the app, and no internet connection is required to access or manage them. Notifications that you delete are stored temporarily in a "Recently Deleted" section for easy recovery and will be automatically deleted after 90 days.
     </p>
     <p>
-      <strong>Preferences:</strong> Your app preferences, such as auto-delete settings, selected apps, and
-      notification management options like search functionality and multi-app selection, are stored locally
-      on your device to help personalize your experience.
+      <strong>Preferences:</strong> Your app preferences, such as auto-delete settings, selected apps, and notification management options like search functionality and multi-app selection, are stored locally on your device to help personalize your experience.
     </p>
   </section>
 
@@ -48,29 +137,18 @@
       We use your data to enhance your experience with Notify: Notifications History in the following ways:
     </p>
     <ul>
-      <li>
-        Displaying and managing your notifications within the app to help you stay organized.
-      </li>
-      <li>
-        Enabling efficient notification management through features like search functionality and multi-app selection.
-      </li>
-      <li>
-        Allowing you to recover recently deleted notifications stored temporarily within the app.
-      </li>
-      <li>
-        Providing flexible auto-delete options, such as "Never," "Daily," "Weekly," or "Monthly," to suit your preferences.
-      </li>
-      <li>
-        Giving you the option to delete all notifications at once with a single click.
-      </li>
+      <li>Displaying and managing your notifications within the app to help you stay organized.</li>
+      <li>Enabling efficient notification management through features like search functionality and multi-app selection.</li>
+      <li>Allowing you to recover recently deleted notifications stored temporarily within the app.</li>
+      <li>Providing flexible auto-delete options, such as "Never," "Daily," "Weekly," or "Monthly," to suit your preferences.</li>
+      <li>Giving you the option to delete all notifications at once with a single click.</li>
     </ul>
   </section>
 
   <section>
     <h3>Data Retention</h3>
     <p>
-      Notifications and associated data are securely stored in Firebase for as long as you continue using Notify:
-      Notifications History. Additionally:
+      Notifications and associated data are securely stored on your device's local internal storage so that your data persists even across uninstallations and reinstallations of the app. Additionally:
     </p>
     <ul>
       <li>Notifications stored in the "Recently Deleted" section will be retained for up to 3 months (90 days) before being automatically deleted.</li>
@@ -78,25 +156,21 @@
       <li>All notifications can be deleted with a single click through the app settings, offering you full control over your data.</li>
     </ul>
     <p>
-      If you uninstall the app, all associated data will be permanently deleted, ensuring that no information is
-      retained. We respect your choices and are committed to maintaining your control over your data.
+      Our storage solution ensures that your notifications remain accessible without an internet connection, even after uninstalling and reinstalling the app.
     </p>
   </section>
 
   <section>
     <h3>Data Sharing</h3>
     <p>
-      We care about your privacy. Your personal data will never be shared with third parties. We only use your
-      information to improve your experience with the app.
+      We care about your privacy. Your personal data will never be shared with third parties. We only use your information to improve your experience with the app.
     </p>
   </section>
 
   <section>
     <h3>Data Security</h3>
     <p>
-      Your data security is very important to us. We store notifications safely using Firebase and take robust measures
-      to protect your information. While no method of transmission or storage is entirely secure, we are committed to
-      continuously improving our protection measures to ensure your data remains safe.
+      Your data security is very important to us. We store notifications safely on your device's local internal storage and take robust measures to protect your information. While no method of storage is entirely secure, we continuously work to improve our security measures and recommend that you keep your device’s security settings up to date.
     </p>
   </section>
 
@@ -106,29 +180,17 @@
       We respect your rights over your data. You have the following options to manage your information:
     </p>
     <ul>
-      <li>
-        You can search for notifications and select multiple apps with one click for easier management.
-      </li>
-      <li>
-        Recently deleted notifications are temporarily stored for up to 90 days (3 months) and will be auto-deleted afterward.
-      </li>
-      <li>
-        You can configure auto-delete preferences to remove notifications based on your chosen schedule, such as daily, weekly, monthly, or never.
-      </li>
-      <li>
-        All notifications can be deleted at once with a single click through the app settings.
-      </li>
+      <li>You can search for notifications and select multiple apps with one click for easier management.</li>
+      <li>Recently deleted notifications are temporarily stored for up to 90 days (3 months) and will be auto-deleted afterward.</li>
+      <li>You can configure auto-delete preferences to remove notifications based on your chosen schedule, such as daily, weekly, monthly, or never.</li>
+      <li>All notifications can be deleted at once with a single click through the app settings.</li>
     </ul>
   </section>
 
   <section>
     <h3>Third-Party Services</h3>
     <p>
-      Notify: Notifications History uses trusted third-party services, such as Firebase, for essential features. These services may process or store data as part of their operations, and we ensure they adhere to the highest standards of security and privacy.
-    </p>
-    <p>
-      You can learn more about Firebase's privacy practices by visiting their
-      <a href="https://firebase.google.com/support/privacy" target="_blank">Privacy Policy</a>.
+      Notify: Notifications History does not rely on external storage services for your data. All your notifications and related data are stored directly on your device's local internal storage. We do not share or process your data with any external service providers for data storage.
     </p>
   </section>
 
@@ -138,6 +200,10 @@
       We may occasionally update this Privacy Policy to improve our services. Any changes will be reflected in the app, and by continuing to use Notify: Notifications History, you acknowledge and accept the updated policy. We recommend reviewing the policy periodically to stay informed.
     </p>
   </section>
+
+  <footer>
+    &copy; 2025 Notify: Notification History | Powered by CodePati | All Rights Reserved
+  </footer>
 </div>
 </body>
 </html>

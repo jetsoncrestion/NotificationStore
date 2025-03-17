@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    tools:context=".WelcomeActivity">
+
+    <ImageView
+        android:id="@+id/imageViewLogo"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_marginTop="@dimen/_70sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/_92_log_05" />
+
+    <TextView
+        android:id="@+id/textViewWelcomeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:fontFamily="@font/poppins_regular"
+        android:padding="@dimen/_3sdp"
+        android:text="@string/welcome_to_nnotify_notifications_history"
+        android:textAlignment="center"
+        android:textColor="@color/special"
+        android:textSize="@dimen/_18sdp"
+        android:letterSpacing=".05"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewLogo"
+        app:layout_constraintStart_toStartOf="@+id/imageViewLogo"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewLogo" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:fontFamily="@font/roboto"
+        android:lineSpacingExtra="@dimen/_3sdp"
+        android:padding="@dimen/_3sdp"
+        android:text="@string/welcomeFirstLine"
+        android:textAlignment="center"
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewWelcomeText" />
+
+    <TextView
+        android:id="@+id/textViewSecond"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/welcomeSecondLine"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@color/subHeadingText"
+        android:textStyle="bold"
+        android:layout_marginStart="@dimen/_70sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/textViewThird"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/welcomeThirdLine"
+        android:textColor="@color/subHeadingText"
+        android:layout_marginStart="@dimen/_20sdp"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewSecond"
+        app:layout_constraintTop_toBottomOf="@+id/textViewSecond" />
+
+    <TextView
+        android:id="@+id/textViewFourth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/welcomeFourthLine"
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewThird"
+        app:layout_constraintTop_toBottomOf="@+id/textViewThird" />
+
+    <TextView
+        android:id="@+id/textViewFifth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/welcomeFifthLine"
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewFourth"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFourth" />
+
+    <TextView
+        android:id="@+id/textViewSixth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/welcomeSixthLine"
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintStart_toStartOf="@+id/textViewFifth"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFifth" />
+
+    <TextView
+        android:id="@+id/textViewSeventh"
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:lineSpacingExtra="@dimen/_3sdp"
+        android:padding="@dimen/_3sdp"
+        android:text="@string/welcomeSeventhLine"
+        android:textAlignment="center"
+        android:textColor="@color/subHeadingText"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewSixth" />
+</androidx.constraintlayout.widget.ConstraintLayout>

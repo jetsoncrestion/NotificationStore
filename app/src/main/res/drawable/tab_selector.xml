@@ -1,4 +1,21 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/circle_active" android:state_selected="true" />
-    <item android:drawable="@drawable/circle_inactive" />
+
+    <!-- Selected tab indicator (Blue Circle) -->
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/blue" />
+            <size android:width="15dp" android:height="15dp" /> <!-- Equal width and height -->
+            <corners android:radius="5dp" /> <!-- Half of the width/height to ensure a perfect circle -->
+        </shape>
+    </item>
+
+    <!-- Unselected tab indicator (Gray Circle) -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/gray" />
+            <size android:width="10dp" android:height="10dp" /> <!-- Equal width and height -->
+            <corners android:radius="5dp" /> <!-- Half of the width/height to ensure a perfect circle -->
+        </shape>
+    </item>
+
 </selector>

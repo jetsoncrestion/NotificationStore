@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:paddingStart="@dimen/_20sdp"
+    android:paddingTop="@dimen/_10sdp"
+    android:paddingEnd="@dimen/_20sdp"
+    android:paddingBottom="@dimen/_10sdp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.widget.RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonEnglish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/english"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonNepali"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/nepali"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonHindi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/hindi"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonKorean"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/korean"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonPortuguese"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/portuguese"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonItalian"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/italian"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioButtonFrench"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingVertical="8dp"
+                android:text="@string/french"
+                android:textColor="#004F98"
+                android:textSize="@dimen/_11ssp" />
+
+        </android.widget.RadioGroup>
+
+        <TextView
+            android:id="@+id/textViewAccept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_18sdp"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="@string/accept"
+            android:textColor="#F06924"
+            android:textSize="@dimen/_16ssp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/radioGroup" />
+
+        <TextView
+            android:id="@+id/textViewCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_18sdp"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="@string/cancel"
+            android:textColor="#000000"
+            android:textSize="@dimen/_16ssp"
+            app:layout_constraintBottom_toBottomOf="@id/textViewAccept"
+            app:layout_constraintEnd_toStartOf="@id/textViewAccept"
+            app:layout_constraintTop_toTopOf="@id/textViewAccept" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

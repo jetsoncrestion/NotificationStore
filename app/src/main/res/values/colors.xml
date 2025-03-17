@@ -23,4 +23,8 @@
     <color name="novelPrimary">#6A5ACD</color>
     <color name="novelPrimaryText">#483D8B</color>
 
+    <color name="blue">#007BFF</color> <!-- Blue color -->
+    <color name="gray">#D3D3D3</color> <!-- Gray color -->
+
+
 </resources>

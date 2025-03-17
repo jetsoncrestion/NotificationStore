@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    tools:context=".AboutActivity">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
+        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:backgroundTint="#F06924"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/notificationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_14sdp"
+                android:fontFamily="@font/poppins_regular"
+                android:letterSpacing=".05"
+                android:text="@string/about_app"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_22ssp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageViewBack"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imageViewBack"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                app:layout_constraintBottom_toBottomOf="@+id/notificationTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/notificationTitle"
+                app:srcCompat="@drawable/back" />
+
+            <ImageView
+                android:id="@+id/imageViewAbout"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/about_copy" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_80sdp"
+        android:fontFamily="@font/poppins_regular"
+        android:letterSpacing=".05"
+        android:padding="@dimen/_4sdp"
+        android:text="@string/notify_nnotification_history"
+        android:textAlignment="center"
+        android:textColor="#EF6824"
+        android:textSize="@dimen/_26ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView2" />
+
+    <TextView
+        android:id="@+id/appNameVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="40"
+        android:fontFamily="@font/roboto"
+        android:letterSpacing=".05"
+        android:padding="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_40sdp"
+        android:text="@string/version_1_1_1"
+        android:textAlignment="center"
+        android:textColor="	#36454F"
+        android:textSize="@dimen/_18ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/appName"
+        app:layout_constraintStart_toStartOf="@+id/appName"
+        app:layout_constraintTop_toBottomOf="@+id/appName" />
+
+    <TextView
+        android:id="@+id/appNameVersionDesp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_regular"
+        android:letterSpacing=".05"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:text="@string/the_latest_version_is_already_updated"
+        android:textAlignment="center"
+        android:textColor="#36454F"
+        android:textSize="@dimen/_18ssp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/appNameVersion"
+        app:layout_constraintStart_toStartOf="@+id/appNameVersion"
+        app:layout_constraintTop_toBottomOf="@+id/appNameVersion" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/PP"
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@drawable/custom_svae"
+        android:elevation="5dp"
+        android:fontFamily="@font/poppins_regular"
+        android:gravity="center"
+        android:letterSpacing=".05"
+        android:text="@string/privacy_policy"
+        android:layout_marginBottom="@dimen/_14sdp"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_18ssp"
+        android:textStyle="bold"
+        android:translationZ="2dp"
+        app:layout_constraintBottom_toTopOf="@+id/tc"
+        app:layout_constraintEnd_toEndOf="@+id/tc"
+        app:layout_constraintStart_toStartOf="@+id/tc" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/tc"
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginBottom="@dimen/_34sdp"
+        android:background="@drawable/custom_svae"
+        android:elevation="5dp"
+        android:fontFamily="@font/poppins_regular"
+        android:gravity="center"
+        android:letterSpacing=".05"
+        android:text="@string/terms_and_conditions"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_18ssp"
+        android:textStyle="bold"
+        android:translationZ="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

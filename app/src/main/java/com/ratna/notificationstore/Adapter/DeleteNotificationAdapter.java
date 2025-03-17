@@ -19,6 +19,7 @@ import com.ratna.notificationstore.Model.DeleteNotificationModel;
 import com.ratna.notificationstore.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -49,8 +50,8 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
         holder.appName.setText(model.getAppName());
         holder.notificationContent.setText(model.getNotificationContent());
 
-        long timestamp = model.getNotificationDateTime();
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date(timestamp));
+        long timestamp = model.getTimeStamp();
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd / hh:mm a", Locale.getDefault()).format(new Date(timestamp));
         holder.notificationDateTime.setText(formattedDate);
 
         String appIconBase64 = model.getAppIconBase64();
@@ -66,13 +67,17 @@ public class DeleteNotificationAdapter extends RecyclerView.Adapter<DeleteNotifi
             if (deleteListener != null) {
                 PopupMenu popupMenu = new PopupMenu(context, v);
                 popupMenu.inflate(R.menu.second_menu);
-
                 popupMenu.setOnMenuItemClickListener(item -> {
+                    int currentPosition = holder.getAdapterPosition();
+                    if (currentPosition == RecyclerView.NO_POSITION) {
+                        return false;
+                    }
+                    DeleteNotificationModel currentModel = deleteNotificationModels.get(currentPosition);
                     if (item.getItemId() == R.id.action_Delete_selection) {
-                        deleteListener.onDeleteNotification(model, position);
+                        deleteListener.onDeleteNotification(currentModel, currentPosition);
                         return true;
                     } else if (item.getItemId() == R.id.action_restore_selection) {
-                        deleteListener.onRestoreNotification(model, position);
+                        deleteListener.onRestoreNotification(currentModel, currentPosition);
                         return true;
                     } else {
                         return false;

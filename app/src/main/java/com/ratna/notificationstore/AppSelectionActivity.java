@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -155,7 +156,9 @@ public class AppSelectionActivity extends AppCompatActivity {
                 apps.add(new AppModel(appName, appInfo.packageName, false, appIcon));
             }
         }
-        apps.sort((app1, app2) -> app1.getAppName().compareToIgnoreCase(app2.getAppName()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            apps.sort((app1, app2) -> app1.getAppName().compareToIgnoreCase(app2.getAppName()));
+        }
         return apps;
     }
 
@@ -211,6 +214,7 @@ public class AppSelectionActivity extends AppCompatActivity {
                 selectedApps.add("com.android.chrome"); //Chrome
                 selectedApps.add("com.google.android.googlequicksearchbox"); //Google
                 selectedApps.add("com.facebook.orca"); //Messenger
+                selectedApps.add("com.whatsapp.w4b"); //WhatsApp Business
 
                 editor.putStringSet("selectedApps", selectedApps);
                 editor.apply();
@@ -228,7 +232,10 @@ public class AppSelectionActivity extends AppCompatActivity {
                 }
             }
 
-            boolean allSelected = !appModels.isEmpty() && appModels.stream().allMatch(AppModel::isSelected);
+            boolean allSelected = false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                allSelected = !appModels.isEmpty() && appModels.stream().allMatch(AppModel::isSelected);
+            }
             isSelectAllEnabled = allSelected;
             Switch toggleSwitch = cardView9.findViewById(R.id.toggleSwitch);
             toggleSwitch.setChecked(allSelected);

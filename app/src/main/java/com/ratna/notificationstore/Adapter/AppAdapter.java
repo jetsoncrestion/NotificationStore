@@ -2,6 +2,7 @@ package com.ratna.notificationstore.Adapter;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +64,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
     public List<String> getSelectedApps() {
         // Return package names of selected apps
-        return appModels.stream().filter(AppModel::isSelected).map(AppModel::getPackageName).collect(Collectors.toList());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return appModels.stream().filter(AppModel::isSelected).map(AppModel::getPackageName).collect(Collectors.toList());
+        }
+        return java.util.Collections.emptyList();
     }
 
     public Filter getFilter() {
