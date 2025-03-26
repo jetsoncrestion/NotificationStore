@@ -29,6 +29,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -53,6 +55,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 public class Setting extends BaseActivity implements BackupTask.NotificationDataReader  {
@@ -62,10 +65,11 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
     private GoogleSignInClient googleSignInClient;
     private Drive driveService;
     private ImageView imageViewBack, imageViewGreater;
-    private Switch toggleSwitch, toggleSwitchSecond;
+    private Switch toggleSwitch, toggleSwitchSecond, toggleSwitch3;
     private String deviceId;
+    private ProgressBar progressBar;
     private TextView textViewAppNameVersion, setLanguageName;
-    private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8, cardViewTerms, cardViewPrivacy, cardViewAbout, cardViewShareOurApp, cardViewRateOurApp, cardView15, cardViewHowToUseApp, cardView16, cardView17;
+    private CardView cardView3, cardView4, cardView5, cardView6, cardView7, cardView8, cardViewTerms, cardViewPrivacy, cardViewAbout, cardViewShareOurApp, cardViewRateOurApp, cardView15, cardViewHowToUseApp, cardView16, cardView17, cardView18;
     //private TextView textView4;
     private int thumbOnColor;
     private int thumbOffColor;
@@ -81,7 +85,7 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_setting);
         //textView4 = findViewById(R.id.textView4);
-
+      //  toggleSwitch3.setEnabled(false);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
@@ -90,6 +94,8 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
 
         // Auto-delete old notifications
         autoDeleteOldNotifications();
+        SharedPreferences sharedPreferences1 = getSharedPreferences("PinLock", MODE_PRIVATE);
+        boolean isPinLockEnabled = sharedPreferences1.getBoolean("setPinLock", false);
         TextView textViewAutoSubDeleteNotification = findViewById(R.id.textViewAutoSubDeleteNotification);
         SharedPreferences sharedPreferences = getSharedPreferences("DeletePreferences", MODE_PRIVATE);
         String deleteOption = sharedPreferences.getString("delete_option", "never_delete");
@@ -113,6 +119,7 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         imageViewGreater = findViewById(R.id.imageViewGreater);
         toggleSwitch = findViewById(R.id.toggleSwitch);
         toggleSwitchSecond = findViewById(R.id.toggleSwitchSecond);
+        toggleSwitch3 = findViewById(R.id.toggleSwitch3);
         cardView3 = findViewById(R.id.cardView3);
         cardView4 = findViewById(R.id.cardView4);
         cardView5 = findViewById(R.id.cardView5);
@@ -130,7 +137,11 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         cardViewHowToUseApp = findViewById(R.id.cardViewHowToUseApp);
         cardView16 = findViewById(R.id.cardView16);
         cardView17 = findViewById(R.id.cardView17);
+        progressBar = findViewById(R.id.progressBar);
+        cardView18 = findViewById(R.id.cardView18);
         deviceId = DeviceUtil.getOrGenerateDeviceId(this);
+
+        toggleSwitch3.setEnabled(false);
 
         thumbOnColor = ContextCompat.getColor(this, R.color.switch_thumb_on);
         thumbOffColor = ContextCompat.getColor(this, R.color.switch_thumb_off);
@@ -139,6 +150,7 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
 
         boolean isHideSystemNotifications = loadPreference("hideSystemNotifications");
         boolean isHideDuplicateNotifications = loadPreference("hideDuplicateNotifications");
+        boolean isPinLock = loadPreference("setPinLock");
 
         updateVersionNumber();
         updateLanguageTextView();
@@ -149,6 +161,32 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         toggleSwitchSecond.setChecked(isHideDuplicateNotifications);
         updateSwitchSecondColors(toggleSwitchSecond, isHideDuplicateNotifications);
 
+        toggleSwitch3.setChecked(isPinLockEnabled);
+
+       toggleSwitch3.setOnCheckedChangeListener((buttonView, isChecked) -> {
+           updateSwitchThirdColors(toggleSwitch3, isChecked);
+           savePreference("setPinLock", isChecked);
+
+           if (isChecked) {
+               // check if a pin is already is set
+               String storedPin = getStoredPin(this);
+               if (storedPin == null || storedPin.isEmpty()) {
+                   // Enable PIN lock
+                   Intent intent = new Intent(Setting.this, AddPinLock.class);
+                   startActivity(intent);
+               } else {
+                   // if pin is already set, do not open AddPinLock
+                   Toast.makeText(this, "Pin lock is already set", Toast.LENGTH_SHORT).show();
+               }
+           } else {
+              // SharedPreferences sharedPreferences1 = getSharedPreferences("PinLock", MODE_PRIVATE);
+               //Disable PIN lock
+               SharedPreferences.Editor editor = sharedPreferences1.edit();
+               editor.putBoolean("setPinLock", false);
+               editor.apply();
+               Toast.makeText(this, "PIN lock Disabled", Toast.LENGTH_SHORT).show();
+           }
+       });
         imageViewBack.setOnClickListener(v -> {
             Intent intent = new Intent(Setting.this, MainActivity.class);
             startActivity(intent);
@@ -204,6 +242,11 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         cardView17.setOnClickListener(view -> {
             startRestoreProcess();
         });
+
+        cardView18.setOnClickListener(view -> {
+//            Intent intent = new Intent(Setting.this, AddPinLock.class);
+//            startActivity(intent);
+                });
 
         cardViewTerms.setOnClickListener(v -> {
             Intent intent = new Intent(Setting.this, TermsAndConditionsActivity.class);
@@ -289,13 +332,26 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
                         new GsonFactory(),
                         credential).setApplicationName("Notification Store").build();
             }
-            new BackupTask(this, driveService, this).execute(account);
+            if (!NetworkUtil.isNetworkAvailable(this)) {
+                Toast.makeText(this, "No internet connection. Backup requires an active internet connection.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            progressBar.setVisibility(View.VISIBLE);
+            new BackupTask(this, driveService, this) {
+                @Override
+                protected void onPostExecute(String result) {
+                    super.onPostExecute(result);
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(Setting.this, "Backup completed!", Toast.LENGTH_SHORT).show();
+                }
+            }.execute(account);
         } else {
             Intent signInIntent = googleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void startRestoreProcess() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
@@ -307,7 +363,19 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
                         new GsonFactory(),
                         credential).setApplicationName("Notification Store").build();
             }
-            new BackupTask(this, driveService, this, true).execute(account);
+            if (!NetworkUtil.isNetworkAvailable(this)) {
+                Toast.makeText(this, "No internet connection. Restore requires an active internet connection.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            progressBar.setVisibility(View.VISIBLE);
+            new BackupTask(this, driveService, this, true) {
+                @Override
+                protected void onPostExecute(String result) {
+                    super.onPostExecute(result);
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(Setting.this, "Restore completed!", Toast.LENGTH_SHORT).show();
+                }
+            }.execute(account);
         } else {
             Intent signInIntent = googleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -367,6 +435,23 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
+        }
+    }
+
+    private String getStoredPin(Context context) {
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            EncryptedSharedPreferences sharedPreferences = (EncryptedSharedPreferences) EncryptedSharedPreferences.create(
+                    "secure_pin_prefs",
+                    masterKeyAlias,
+                    context,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+            return sharedPreferences.getString("PIN", null);
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -444,7 +529,7 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
             }
         } catch (IOException e) {
             Log.e("GoogleDrive", "Backup failed: " + e.getMessage(), e);
-            Toast.makeText(this, "Backup failed. Please try again.", Toast.LENGTH_SHORT).show();
+          //  Toast.makeText(this, "Backup failed. Please try again.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -766,8 +851,21 @@ public class Setting extends BaseActivity implements BackupTask.NotificationData
         }
     }
 
+    private void updateSwitchThirdColors(Switch toggleSwitchThird, boolean isChecked) {
+        if (isChecked) {
+            toggleSwitchThird.setThumbTintList(ColorStateList.valueOf(thumbOnColor));
+            toggleSwitchThird.setTrackTintList(ColorStateList.valueOf(trackOnColor));
+        } else {
+            toggleSwitchThird.setThumbTintList(ColorStateList.valueOf(thumbOffColor));
+            toggleSwitchThird.setTrackTintList(ColorStateList.valueOf(trackOffColor));
+        }
+    }
+
     private void savePreference(String key, boolean value) {
-        getSharedPreferences("MyPrefs", MODE_PRIVATE).edit().putBoolean(key, value).apply();
+        SharedPreferences sharedPreferences = getSharedPreferences("PinLock", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
     }
 
     private boolean loadPreference(String key) {

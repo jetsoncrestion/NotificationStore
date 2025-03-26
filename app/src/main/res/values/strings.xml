@@ -95,4 +95,7 @@
     <string name="use_app_4">Enable Background Autostart for Notify: Notification History app to save notifications without interruption.</string>
     <string name="backup">Backup</string>
     <string name="backup_data">Backup Data</string>
+    <string name="how_to_use_app">How to Use App</string>
+    <string name="security">Security</string>
+    <string name="add_pin_lock">Add Pin Lock</string>
 </resources>

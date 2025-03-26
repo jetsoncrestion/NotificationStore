@@ -86,4 +86,15 @@
     <string name="italian">Italien</string>
     <string name="portuguese">Portugais</string>
     <string name="korean">Coréen</string>
+    <string name="choose_your_own_language">Choisissez votre propre langue</string>
+    <string name="hello_blank_fragment">Bonjour fragment vide</string>
+    <string name="app_updated_successfully">Application mise à jour avec succès !</string>
+    <string name="app_update_failed_please_update_the_app_to_continue">Échec de la mise à jour de l\'application ! Veuillez mettre à jour l\'application pour continuer.</string>
+    <string name="use_app_1">Appuyez sur le bouton \"Commencer\" pour commencer.</string>
+    <string name="use_app_2">Sélectionnez l\'application souhaitée pour stocker les notifications.</string>
+    <string name="use_app_3">Appuyez sur le bouton “Autoriser l\'accès” pour donner la permission à l\'application de stocker les notifications.</string>
+    <string name="use_app_4">Activez le démarrage automatique en arrière-plan pour Notify : Notification History afin d\'enregistrer les notifications sans interruption.</string>
+    <string name="backup">Sauvegarde</string>
+    <string name="backup_data">Sauvegarder les données</string>
+    <string name="how_to_use_app">Comment utiliser l\'application</string>
 </resources>

@@ -86,4 +86,15 @@
     <string name="italian">इटालियन</string>
     <string name="portuguese">पुर्तगाली</string>
     <string name="korean">कोरियन</string>
+    <string name="choose_your_own_language">अपनी भाषा चुनें</string>
+    <string name="hello_blank_fragment">नमस्ते खाली फ़्रैगमेंट</string>
+    <string name="app_updated_successfully">ऐप सफलतापूर्वक अपडेट किया गया!</string>
+    <string name="app_update_failed_please_update_the_app_to_continue">ऐप अपडेट विफल! कृपया जारी रखने के लिए ऐप को अपडेट करें।</string>
+    <string name="use_app_1">शुरू करने के लिए "प्रारंभ करें" बटन दबाएं।</string>
+    <string name="use_app_2">सूचनाओं को सहेजने के लिए इच्छित ऐप का चयन करें।</string>
+    <string name="use_app_3">ऐप को सूचनाएं सहेजने की अनुमति देने के लिए "अनुमति दें" बटन दबाएं।</string>
+    <string name="use_app_4">बिना किसी रुकावट के सूचनाओं को सहेजने के लिए Notify: Notification History ऐप के लिए बैकग्राउंड ऑटोस्टार्ट सक्षम करें।</string>
+    <string name="backup">बैकअप</string>
+    <string name="backup_data">डेटा बैकअप</string>
+    <string name="how_to_use_app">ऐप का उपयोग कैसे करें</string>
 </resources>

@@ -342,7 +342,6 @@
                         android:textSize="@dimen/_8ssp"
                         app:layout_constraintStart_toStartOf="@+id/textViewDeleteAllNotification"
                         app:layout_constraintTop_toBottomOf="@+id/textViewDeleteAllNotification" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
@@ -465,6 +464,65 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
+                android:id="@+id/textViewSecurity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:fontFamily="@font/poppins_regular"
+                android:text="@string/security"
+                android:textColor="#EF6824"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cardView15" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView18"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:backgroundTint="#F5F5F5"
+                app:cardCornerRadius="@dimen/_6sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSecurity">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textViewAddPinLock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_15sdp"
+                        android:fontFamily="@font/roboto"
+                        android:text="@string/add_pin_lock"
+                        android:textColor="@color/special"
+                        android:textSize="@dimen/_10ssp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Switch
+                        android:id="@+id/toggleSwitch3"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/_18sdp"
+                        android:scaleX="1.5"
+                        android:scaleY="1.5"
+                        android:text=""
+                        android:thumbTint="@color/switch_thumb_off"
+                        android:trackTint="@color/switch_track_off"
+                        app:layout_constraintBottom_toBottomOf="@+id/textViewAddPinLock"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/textViewAddPinLock"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
                 android:id="@+id/textViewBackupData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -476,7 +534,7 @@
                 android:textSize="@dimen/_14ssp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cardView15" />
+                app:layout_constraintTop_toBottomOf="@+id/cardView18" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView16"
@@ -485,7 +543,6 @@
                 android:layout_marginTop="@dimen/_20sdp"
                 android:backgroundTint="#F5F5F5"
                 app:cardCornerRadius="@dimen/_6sdp"
-                app:cardElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewBackupData">
@@ -523,10 +580,9 @@
                 android:id="@+id/cardView17"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_50sdp"
-                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_9sdp"
                 android:backgroundTint="#F5F5F5"
                 app:cardCornerRadius="@dimen/_6sdp"
-                app:cardElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/cardView16">
@@ -541,7 +597,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_15sdp"
                         android:fontFamily="@font/roboto"
-                        android:text="Restore"
+                        android:text="@string/restore"
                         android:textColor="@color/special"
                         android:textSize="@dimen/_10ssp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -809,7 +865,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_10sdp"
                         android:fontFamily="@font/roboto"
-                        android:text="How to Use App"
+                        android:text="@string/how_to_use_app"
                         android:textColor="@color/special"
                         android:textSize="@dimen/_10ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/imageViewHowToUseApp"
@@ -992,4 +1048,16 @@
                 app:layout_constraintStart_toStartOf="@+id/textViewCopyRight" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

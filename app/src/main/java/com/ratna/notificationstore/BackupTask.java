@@ -52,6 +52,10 @@ public class BackupTask extends AsyncTask<GoogleSignInAccount, Void, String> {
             return "Google account not found. Please sign in again";
         }
 
+        if (!NetworkUtil.isNetworkAvailable(context)) {
+            return "No internet connection. Backup/restore requires an active internet connection.";
+        }
+
         if (isRestore) {
             return restoreData();
         } else {
@@ -70,7 +74,7 @@ public class BackupTask extends AsyncTask<GoogleSignInAccount, Void, String> {
             Drive.Files.List request = driveService.files().list()
                     .setQ("name='" + backupFileName + "' and trashed=false")
                     .setSpaces("drive")
-                    .setFields("files(id");
+                    .setFields("files(id)");
             FileList fileList = request.execute();
             if (!fileList.getFiles().isEmpty()) {
                 fileId = fileList.getFiles().get(0).getId();
@@ -93,7 +97,7 @@ public class BackupTask extends AsyncTask<GoogleSignInAccount, Void, String> {
             }
         } catch (IOException e) {
             Log.e("GoogleDrive", "Backup failed: " + e.getMessage(), e);
-            return "Backup failed. Please try again.";
+            return "Backup failed. Please check your internet connection and try again.";
         }
     }
 
@@ -120,7 +124,7 @@ public class BackupTask extends AsyncTask<GoogleSignInAccount, Void, String> {
             }
         } catch (IOException e) {
             Log.e(TAG, "Restore Failed: " + e.getMessage(), e);
-            return "Restore failed. Please try again.";
+            return "Restore failed. Please check your internet connection and try again.";
         }
     }
 

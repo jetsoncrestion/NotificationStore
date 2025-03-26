@@ -12,14 +12,14 @@
         </intent>
     </queries>
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
     <uses-permission
@@ -36,6 +36,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationStore"
         tools:targetApi="34">
+        <activity
+            android:name=".ResetPinActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SetSecurityQuestionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddPinLock"
+            android:exported="false" />
+        <activity
+            android:name=".ForgetPin"
+            android:exported="false" />
+        <activity
+            android:name=".PinLock"
+            android:exported="false" />
         <activity
             android:name=".HowToUseApp"
             android:exported="false" />
@@ -69,6 +84,16 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity
             android:name=".Setting"

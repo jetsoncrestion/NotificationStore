@@ -29,7 +29,7 @@
                 android:layout_marginTop="@dimen/_4sdp"
                 android:fontFamily="@font/poppins_regular"
                 android:letterSpacing=".05"
-                android:text="How to Use App"
+                android:text="@string/how_to_use_app"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_22ssp"

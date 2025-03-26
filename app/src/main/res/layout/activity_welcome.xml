@@ -31,8 +31,7 @@
         app:tabMode="fixed"
         app:tabPaddingStart="10dp"
         app:tabPaddingEnd="10dp"
-        app:tabIndicatorHeight="0dp"
-        />
+        app:tabIndicatorHeight="0dp" />
 
     <TextView
         android:id="@+id/textViewSkip"

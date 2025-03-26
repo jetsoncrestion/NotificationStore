@@ -86,4 +86,15 @@
     <string name="italian">इटालियन</string>
     <string name="portuguese">पोर्चुगिज</string>
     <string name="korean">कोरियन</string>
+    <string name="choose_your_own_language">आफ्नो भाषा छान्नुहोस्</string>
+    <string name="hello_blank_fragment">नमस्ते, खाली टुक्रा</string>
+    <string name="app_updated_successfully">एप सफलतापूर्वक अपडेट गरियो!</string>
+    <string name="app_update_failed_please_update_the_app_to_continue">एप अपडेट असफल! कृपया जारी राख्न एप अपडेट गर्नुहोस्।</string>
+    <string name="use_app_1">सुरु गर्न "सुरु गर्नुहोस्" बटन थिच्नुहोस्।</string>
+    <string name="use_app_2">सूचनाहरू सङ्ग्रह गर्न इच्छित एप चयन गर्नुहोस्।</string>
+    <string name="use_app_3">एपलाई सूचनाहरू सङ्ग्रह गर्न अनुमति दिन "अनुमति दिनुहोस्" बटन थिच्नुहोस्।</string>
+    <string name="use_app_4">सूचनाहरू बिना अवरोध बचत गर्न Notify: Notification History एपको पृष्ठभूमि स्वत: सुरुवात सक्षम गर्नुहोस्।</string>
+    <string name="backup">ब्याकअप</string>
+    <string name="backup_data">डेटा ब्याकअप</string>
+    <string name="how_to_use_app">एप कसरी प्रयोग गर्ने</string>
 </resources>

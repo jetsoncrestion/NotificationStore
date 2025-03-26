@@ -11,8 +11,8 @@ android {
         applicationId = "com.ratna.notificationstore"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "3.3"
+        versionCode = 13
+        versionName = "3.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,4 +68,7 @@ dependencies {
     implementation ("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
     implementation ("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
     implementation ("com.airbnb.android:lottie:6.6.2")
+    implementation ("androidx.work:work-runtime:2.7.1")
+    implementation ("com.google.firebase:firebase-messaging:23.0.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
 }

@@ -86,4 +86,15 @@
     <string name="italian">이탈리아어</string>
     <string name="portuguese">포르투갈어</string>
     <string name="korean">한국어</string>
+    <string name="choose_your_own_language">자신의 언어를 선택하세요</string>
+    <string name="hello_blank_fragment">안녕하세요, 빈 프래그먼트입니다</string>
+    <string name="app_updated_successfully">앱이 성공적으로 업데이트되었습니다!</string>
+    <string name="app_update_failed_please_update_the_app_to_continue">앱 업데이트 실패! 계속하려면 앱을 업데이트하세요.</string>
+    <string name="use_app_1">시작하려면 "시작하기" 버튼을 누르세요.</string>
+    <string name="use_app_2">알림을 저장할 원하는 앱을 선택하세요.</string>
+    <string name="use_app_3">앱이 알림을 저장할 수 있도록 "접근 허용" 버튼을 누르세요.</string>
+    <string name="use_app_4">알림을 중단 없이 저장하려면 Notify: Notification History 앱의 백그라운드 자동 시작을 활성화하세요.</string>
+    <string name="backup">백업</string>
+    <string name="backup_data">데이터 백업</string>
+    <string name="how_to_use_app">앱 사용 방법</string>
 </resources>

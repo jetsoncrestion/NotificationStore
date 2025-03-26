@@ -86,4 +86,15 @@
     <string name="italian">Italiano</string>
     <string name="portuguese">Portoghese</string>
     <string name="korean">Coreano</string>
+    <string name="choose_your_own_language">Scegli la tua lingua</string>
+    <string name="hello_blank_fragment">Ciao, frammento vuoto</string>
+    <string name="app_updated_successfully">App aggiornata con successo!</string>
+    <string name="app_update_failed_please_update_the_app_to_continue">Aggiornamento dell\'app non riuscito! Aggiorna l\'app per continuare.</string>
+    <string name="use_app_1">Tocca il pulsante "Inizia" per iniziare.</string>
+    <string name="use_app_2">Seleziona l\'app desiderata per salvare le notifiche.</string>
+    <string name="use_app_3">Tocca il pulsante “Consenti accesso” per autorizzare l\'app a salvare le notifiche.</string>
+    <string name="use_app_4">Abilita l\'avvio automatico in background per Notify: Notification History per salvare le notifiche senza interruzioni.</string>
+    <string name="backup">Backup</string>
+    <string name="backup_data">Backup dei dati</string>
+    <string name="how_to_use_app">Come usare l\'app</string>
 </resources>

@@ -216,13 +216,13 @@ public class MyNotificationListenerService extends NotificationListenerService {
             ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
             appName = pm.getApplicationLabel(appInfo).toString();
             Drawable appIconDrawable = pm.getApplicationIcon(packageName);
-            appIconBase64 = shortenBase64(drawableToBase64(appIconDrawable));
+            appIconBase64 = drawableToBase64(appIconDrawable);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "App not found: " + packageName, e);
             appName = packageName;
         }
 
-        saveNotificationToInternalStorage(appName, heading, text, timestamp, shortenBase64(appIconBase64), packageName);
+        saveNotificationToInternalStorage(appName, heading, text, timestamp, appIconBase64, packageName);
 
         Intent intent = pm.getLaunchIntentForPackage(packageName);
         if (intent != null) {
@@ -253,7 +253,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
     private void saveNotificationToInternalStorage(String appName, String heading, String text, long timestamp, String appIconBase64, String packageName) {
         try{
-            appIconBase64 = shortenBase64(appIconBase64);
             File directory = new File(getFilesDir(), "NotificationStores");
             if (!directory.exists() && !directory.mkdirs()) {
                 Log.e(TAG, "Failed to create directory for notifications: " + directory.getAbsolutePath());
@@ -291,13 +290,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
         } catch (Exception e){
             Log.e(TAG, "Failed to save notification internally", e);
         }
-    }
-
-    private String shortenBase64(String base64String) {
-        if (base64String == null || base64String.length() <= 10) {
-            return base64String;
-        }
-        return base64String.substring(0, 10);
     }
 
     private void handleMultiMessageNotification(String packageName, String messageSummary) {

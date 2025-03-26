@@ -5,19 +5,28 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,9 +52,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -63,22 +75,33 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends BaseActivity {
+    private static final String PREFS_NAME2 = "BackupPrefs";
+    private static final String LAST_NOTIFICATION_TIME_KEY = "last_notification_time";
+    private static final String LAST_BACKUP_TIME_KEY = "last_backup_time";
+    private static final long BACKUP_INTERVAL = 15 * 24 * 60 * 60 * 1000L;
     private static final String TAG = "MainActivity";
     private static final String PREFS_NAME = "NotificationStorePrefs";
     private static final String DEVICE_ID_KEY = "DeviceID";
     private static final String AUTO_START_PROMPT_SHOWN = "auto_start_prompt_shown";
+    private static final long STORAGE_LIMIT = 5L * 1024 * 1024 * 1024;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Context context;
     private NotificationAdapter notificationAdapter;
@@ -87,7 +110,6 @@ public class MainActivity extends BaseActivity {
     public static List<NotificationModel> getNotificationModels() {
         return notificationModels;
     }
-
     private String deviceId;
     private ImageView imageViewSetting, imageViewSearch, imageViewFilter, imageViewMenu;
     private SearchView searchView;
@@ -102,6 +124,14 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        IntentFilter filter = new IntentFilter("com.ratna.notificationstore.SEND_SUMMARY");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            registerReceiver(summaryReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(summaryReceiver, filter);
+        }
+        scheduleWeeklySummary();
 
         FirebaseMessaging.getInstance().subscribeToTopic("app_update_notification");
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
@@ -118,6 +148,13 @@ public class MainActivity extends BaseActivity {
         if (isMIUI() && !prefs.getBoolean(AUTO_START_PROMPT_SHOWN, false)) {
             enableAutostart();
         }
+
+        scheduleBackupAlertWorker();
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("show_backup_dialog", false)) {
+            checkAndShowBackupAlert();
+        }
+        //checkAndShowBackupAlert();
 
         appUpdateManager = AppUpdateManagerFactory.create(this);
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
@@ -152,8 +189,8 @@ public class MainActivity extends BaseActivity {
         imageViewMenu = findViewById(R.id.imageViewMenu);
 
         imageViewSetting.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, Setting.class);
-            startActivity(intent);
+            Intent intent4 = new Intent(MainActivity.this, Setting.class);
+            startActivity(intent4);
         });
 
         imageViewSearch.setOnClickListener(v -> {
@@ -173,9 +210,9 @@ public class MainActivity extends BaseActivity {
 
             popupMenu.setOnMenuItemClickListener(item -> {
                 String selectedApp = item.getTitle().toString();
-                Intent intent = new Intent(MainActivity.this, FilteredNotificationActivity.class);
-                intent.putExtra("selectedApp", selectedApp);
-                startActivity(intent);
+                Intent intent2 = new Intent(MainActivity.this, FilteredNotificationActivity.class);
+                intent2.putExtra("selectedApp", selectedApp);
+                startActivity(intent2);
                 return true;
             });
 
@@ -330,8 +367,8 @@ public class MainActivity extends BaseActivity {
         });
 
         if (!isNotificationListenerEnabled()) {
-            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-            startActivity(intent);
+            Intent intent3 = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent3);
         }
 
         RecyclerView recyclerView = findViewById(R.id.notificationRecyclerView);
@@ -348,6 +385,21 @@ public class MainActivity extends BaseActivity {
         super.onResume();
         rebindNotificationListenerService();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(summaryReceiver);
+    }
+
+    private final BroadcastReceiver summaryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("com.ratna.notificationstore.SEND_SUMMARY".equals(intent.getAction())) {
+                sendNotificationSummary();
+            }
+        }
+    };
 
     private void enableAutostart() {
             try {
@@ -404,6 +456,79 @@ public class MainActivity extends BaseActivity {
         }, 2000);
     }
 
+    private void scheduleBackupAlertWorker() {
+        PeriodicWorkRequest backupWorkRequest = new PeriodicWorkRequest.Builder(
+                BackupAlertWorker.class,
+                15, TimeUnit.DAYS)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(backupWorkRequest);
+    }
+
+    private void checkAndShowBackupAlert() {
+//        if (!isBackupAlertEnabled()) {
+//            return; // Skip if backup alerts are disabled
+//        }
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE);
+        long lastBackupTime = prefs.getLong(LAST_BACKUP_TIME_KEY, 0);
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastBackupTime >= BACKUP_INTERVAL) {
+            showBackupDialog();
+        }
+    }
+
+    private void showBackupDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Backup Alert")
+                .setMessage("It's time to back up your notifications. Do you want to back up now?")
+                .setPositiveButton("Backup Now", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Perform backup logic here
+                        performBackup();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Do nothing, just dismiss the dialog
+                        updateLastNotificationTime();
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void updateLastNotificationTime() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(LAST_NOTIFICATION_TIME_KEY, System.currentTimeMillis());
+        editor.apply();
+    }
+
+    private void performBackup() {
+        // Implement your backup logic here
+        // For example, save notifications to a file or upload to a cloud service
+
+        // Update the last backup time
+//        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = prefs.edit();
+//        editor.putLong(LAST_BACKUP_TIME_KEY, System.currentTimeMillis());
+//        editor.apply();
+
+        updateLastBackupTime();
+
+        Toast.makeText(this, "Backup completed successfully!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateLastBackupTime() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(LAST_BACKUP_TIME_KEY, System.currentTimeMillis());
+        editor.apply();
+    }
+
     private void startPeriodicUpdateCheck() {
         updateCheckHandler.postDelayed(new Runnable() {
             @Override
@@ -425,6 +550,16 @@ public class MainActivity extends BaseActivity {
         }).addOnFailureListener(e -> {
             Log.e(TAG,"Update Check failed: " +e.getMessage());
         });
+    }
+
+    private long getStartOfWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        return calendar.getTimeInMillis();
     }
 
 //    private void checkForAppUpdate() {
@@ -460,6 +595,17 @@ public class MainActivity extends BaseActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Summary Channel";
+            String description = "Channel for weekly notification summaries";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("summary_channel", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private void showUpdateNotification() {
@@ -473,7 +619,7 @@ public class MainActivity extends BaseActivity {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "app_update_channel")
-                .setSmallIcon(R.drawable._92_log_05) // Replace with your notification icon
+                .setSmallIcon(R.drawable.notification_icon) // Replace with your notification icon
                 .setContentTitle("App Update Available")
                 .setContentText("A new version of the app is available. Tap to update.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -614,8 +760,7 @@ public class MainActivity extends BaseActivity {
                     model.setNotificationHeading(obj.optString("notificationHeading"));
                     model.setNotificationContent(obj.optString("notificationContent"));
                     model.setTimeStamp(obj.optLong("timestamp"));
-                    String appIconBase64 = shortenBase64(obj.optString("appIconBase64"));
-                    model.setAppIconBase64(appIconBase64);
+                    model.setAppIconBase64(obj.optString("appIconBase64"));
                     model.setPackageName(obj.optString("packageName"));
                     notificationModels.add(model);
                 }
@@ -631,13 +776,7 @@ public class MainActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error loading notification form local storage: " + e.getMessage());
         }
-    }
-
-    private String shortenBase64(String base64String) {
-        if (base64String == null || base64String.length() <= 10) {
-            return base64String; // Return the original string if it's already short or null
-        }
-        return base64String.substring(0, 10); // Return the first 10 characters
+        checkStorageUsage();
     }
 
     private void autoDeleteOldNotificationsLocal() {
@@ -690,6 +829,7 @@ public class MainActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error auto-deleting old notifications: " + e.getMessage());
         }
+        checkStorageUsage();
     }
 
     private boolean isNotificationListenerEnabled() {
@@ -748,5 +888,291 @@ public class MainActivity extends BaseActivity {
 
         notificationAdapter.updateData(filteredList);
         Log.d(TAG, "Filtered notifications count: " + filteredList.size());
+    }
+    private long calculateStorageUsage() {
+        File directory = new File(getFilesDir(), "NotificationStores");
+        if (!directory.exists()) {
+            return 0; // Directory doesn't exist, so storage usage is 0
+        }
+
+        long totalSize = 0;
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                totalSize += file.length(); // Add the size of each file
+            }
+        }
+
+        return totalSize; // Return the total size in bytes
+    }
+
+    private void showStorageLimitAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("Storage Limit Exceeded")
+                .setMessage("Your app's storage has exceeded 5GB. Please delete old notifications or back up your data to free up space.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void checkStorageUsage() {
+        long storageUsage = calculateStorageUsage();
+        long storageLimit = STORAGE_LIMIT; // 5GB in bytes
+
+        Log.d(TAG, "Current storage usage: " + storageUsage + " bytes (" + formatSize(storageUsage) + ")");
+
+        if (storageUsage > storageLimit) {
+            showStorageLimitAlert();
+        }
+    }
+
+    private String formatSize(long size) {
+        if (size <= 0) return "0 B";
+        final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
+    private String generateNotificationSummary() {
+        // Get the current time and calculate the start of the week
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        long startOfWeek = calendar.getTimeInMillis();
+
+        // Initialize a map to store the count of notifications per app
+        Map<String, Integer> appNotificationCounts = new HashMap<>();
+
+        // Iterate through the notifications and count them by app
+        for (NotificationModel model : notificationModels) {
+            if (model.getTimeStamp() >= startOfWeek) {
+                String appName = model.getAppName();
+                appNotificationCounts.put(appName, appNotificationCounts.getOrDefault(appName, 0) + 1);
+            }
+        }
+
+        // Build the summary message
+        StringBuilder summaryMessage = new StringBuilder("You got this week's notifications:\n");
+        for (Map.Entry<String, Integer> entry : appNotificationCounts.entrySet()) {
+            summaryMessage.append(entry.getValue()).append(" from ").append(entry.getKey()).append("\n");
+        }
+
+        return summaryMessage.toString();
+    }
+
+//    private Map<String, Map<String, Integer>> generateDailyNotificationSummary() {
+//        Map<String, Map<String, Integer>> dailySummary = new HashMap<>();
+//
+//        for (NotificationModel model : notificationModels) {
+//            String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(model.getTimeStamp()));
+//            String appName = model.getAppName();
+//
+//            if (!dailySummary.containsKey(date)) {
+//                dailySummary.put(date, new HashMap<>());
+//            }
+//
+//            Map<String, Integer> appCounts = dailySummary.get(date);
+//            appCounts.put(appName, appCounts.getOrDefault(appName, 0) + 1);
+//        }
+//
+//        return dailySummary;
+//    }
+
+    private File generatePdfSummary(Map<String, Integer> appNotificationCounts) {
+        File file = new File(getCacheDir(), "weekly_notification_summary.pdf");
+        try {
+            PdfDocument document = new PdfDocument();
+            int pageWidth = 300;
+            int pageHeight = 600;
+            int margin = 20;
+            int x = margin;
+            int y = margin + 30;
+            int rowHeight = 30;
+            int col1Width = 150; // App Name column width
+            int col2Width = 100; // Notifications column width
+
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create();
+            PdfDocument.Page page = document.startPage(pageInfo);
+            Canvas canvas = page.getCanvas();
+            Paint paint = new Paint();
+
+            // Title
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(18);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            canvas.drawText("Weekly Notification Summary", x, y, paint);
+            y += 40;
+
+            // Date Range
+            paint.setTextSize(14);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+            String dateRange = getDateRange(); // Helper method to get the date range
+            canvas.drawText("Date Range: " + dateRange, x, y, paint);
+            y += 30;
+
+            // Draw table header background
+            paint.setColor(Color.LTGRAY);
+            canvas.drawRect(x, y, pageWidth - margin, y + rowHeight, paint);
+
+            // Draw table headers
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(14);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            canvas.drawText("App", x + 10, y + 20, paint);
+            canvas.drawText("Notifications", x + col1Width + 20, y + 20, paint);
+            y += rowHeight;
+
+            // Draw table content
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+            paint.setTextSize(12);
+
+            int totalNotifications = 0; // Initialize total notifications counter
+
+            for (Map.Entry<String, Integer> entry : appNotificationCounts.entrySet()) {
+                if (y + rowHeight > pageHeight - margin - 30) { // Create a new page if needed
+                    document.finishPage(page);
+                    page = document.startPage(pageInfo);
+                    canvas = page.getCanvas();
+                    y = margin + 30;
+                }
+
+                // Draw row background
+                paint.setColor(Color.WHITE);
+                canvas.drawRect(x, y, pageWidth - margin, y + rowHeight, paint);
+
+                // Draw text
+                paint.setColor(Color.BLACK);
+                String appName = entry.getKey();
+                String notificationCount = String.valueOf(entry.getValue());
+
+                // Ensure app names do not overflow by truncating them
+                int maxAppNameWidth = col1Width - 20;
+                appName = TextUtils.ellipsize(appName, new TextPaint(paint), maxAppNameWidth, TextUtils.TruncateAt.END).toString();
+
+                canvas.drawText(appName, x + 10, y + 20, paint);
+                canvas.drawText(notificationCount, x + col1Width + 40, y + 20, paint);
+                y += rowHeight;
+
+                // Draw row border
+                paint.setColor(Color.GRAY);
+                paint.setStrokeWidth(1);
+                canvas.drawLine(x, y, pageWidth - margin, y, paint);
+
+                // Add to total notifications
+                totalNotifications += entry.getValue();
+            }
+
+            // Add a row for the total notifications
+            if (y + rowHeight > pageHeight - margin - 30) { // Create a new page if needed
+                document.finishPage(page);
+                page = document.startPage(pageInfo);
+                canvas = page.getCanvas();
+                y = margin + 30;
+            }
+
+            // Draw total row background
+            paint.setColor(Color.LTGRAY);
+            canvas.drawRect(x, y, pageWidth - margin, y + rowHeight, paint);
+
+            // Draw total text
+            paint.setColor(Color.BLACK);
+            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            canvas.drawText("Total", x + 10, y + 20, paint);
+            canvas.drawText(String.valueOf(totalNotifications), x + col1Width + 40, y + 20, paint);
+            y += rowHeight;
+
+            // Draw row border
+            paint.setColor(Color.GRAY);
+            paint.setStrokeWidth(1);
+            canvas.drawLine(x, y, pageWidth - margin, y, paint);
+
+            document.finishPage(page);
+            document.writeTo(new FileOutputStream(file));
+            document.close();
+        } catch (IOException e) {
+            Log.e("PDF", "Error generating PDF: " + e.getMessage());
+        }
+        return file;
+    }
+
+    private String getDateRange() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        String startDate = dateFormat.format(calendar.getTime());
+
+        calendar.add(Calendar.DAY_OF_WEEK, 6); // Move to the end of the week
+        String endDate = dateFormat.format(calendar.getTime());
+
+        return startDate + " - " + endDate;
+    }
+
+    private void sendNotificationSummary() {
+        if (!shouldSendNotification()) {
+            return;
+        }
+        String summaryMessage = generateNotificationSummary();
+        Map<String, Integer> appNotificationCounts = new HashMap<>();
+        for (NotificationModel model : notificationModels) {
+            if (model.getTimeStamp() >= getStartOfWeek()) {
+                String appName = model.getAppName();
+                appNotificationCounts.put(appName, appNotificationCounts.getOrDefault(appName, 0) + 1);
+            }
+        }
+        File pdfFile = generatePdfSummary(appNotificationCounts);
+        createNotificationChannel();
+        NotificationCompat.Builder textSummaryBuilder = new NotificationCompat.Builder(this, "summary_channel")
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle("Weekly Notification Summary")
+                .setContentText("Tap to view the weekly notification summary")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(summaryMessage))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        Uri pdfUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", pdfFile);
+        Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
+        pdfIntent.setDataAndType(pdfUri, "application/pdf");
+        pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        PendingIntent pdfPendingIntent = PendingIntent.getActivity(this, 0, pdfIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder pdfSummaryBuilder = new NotificationCompat.Builder(this, "summary_channel")
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle("Weekly Notification PDF")
+                .setContentText("Tap to view the PDF summary")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setContentIntent(pdfPendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, textSummaryBuilder.build());
+        notificationManager.notify(2, pdfSummaryBuilder.build());
+
+        updateLastNotificationTime();
+    }
+
+    private void scheduleWeeklySummary() {
+        PeriodicWorkRequest summaryWorkRequest = new PeriodicWorkRequest.Builder(
+                SummaryWorker.class,
+                7, TimeUnit.DAYS) // Repeat every 7 days
+                .build();
+
+        WorkManager.getInstance(this).enqueue(summaryWorkRequest);
+    }
+
+    private boolean shouldSendNotification() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        long lastNotificationTime = prefs.getLong(LAST_NOTIFICATION_TIME_KEY, 0);
+        long currentTime = System.currentTimeMillis();
+
+        // Check if a week has passed since the last notification
+        return (currentTime - lastNotificationTime) >= TimeUnit.DAYS.toMillis(7);
     }
 }
